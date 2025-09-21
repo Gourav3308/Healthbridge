@@ -13,11 +13,11 @@ services:
       - key: PORT
         value: "8081"
       - key: DATABASE_URL
-        value: # Add your Railway MySQL connection string here
+        value: "jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       - key: DB_USERNAME
-        value: # Add your Railway MySQL username here  
+        value: "root"  
       - key: DB_PASSWORD
-        value: # Add your Railway MySQL password here
+        value: "wHZXIDkxfIhahvxrWjAPIKJLRTeUboOc"
       - key: JWT_SECRET
         generateValue: true
       - key: MAIL_USERNAME
