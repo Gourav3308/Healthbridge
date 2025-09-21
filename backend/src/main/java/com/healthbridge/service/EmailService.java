@@ -37,7 +37,7 @@ public class EmailService {
                 "• Start accepting patient appointments\n" +
                 "• Manage your profile and consultation fees\n\n" +
                 "Getting Started:\n" +
-                "1. Visit our platform: http://localhost:4200\n" +
+                "1. Visit our platform: https://healthbridge-frontend-jj1.onrender.com\n" +
                 "2. Log in with your registered credentials\n" +
                 "3. Complete your profile setup\n" +
                 "4. Configure your availability schedule\n\n" +
@@ -46,7 +46,7 @@ public class EmailService {
                 "Best regards,\n" +
                 "The HealthBridge Team\n" +
                 "Email: healthbridge13012002@gmail.com\n" +
-                "Website: http://localhost:4200\n\n" +
+                "Website: https://healthbridge-frontend-jj1.onrender.com\n\n" +
                 "Thank you for choosing HealthBridge to serve patients and make healthcare accessible! 🌟",
                 
                 doctor.getFirstName(), doctor.getLastName(),
@@ -119,7 +119,7 @@ public class EmailService {
                 "Best regards,\n" +
                 "🏥 HealthBridge Medical Center Team\n" +
                 "📧 Email: healthbridge13012002@gmail.com\n" +
-                "🌐 Website: http://localhost:4200\n\n" +
+                "🌐 Website: https://healthbridge-frontend-jj1.onrender.com\n\n" +
                 "Thank you for choosing HealthBridge for your healthcare needs!",
                 
                 appointment.getPatient().getFirstName(), 
@@ -192,7 +192,7 @@ public class EmailService {
                 "Best regards,\n" +
                 "🏥 HealthBridge Medical Center Team\n" +
                 "📧 Email: healthbridge13012002@gmail.com\n" +
-                "🌐 Website: http://localhost:4200\n\n" +
+                "🌐 Website: https://healthbridge-frontend-jj1.onrender.com\n\n" +
                 "Thank you for choosing HealthBridge for your healthcare needs!",
                 
                 userName,

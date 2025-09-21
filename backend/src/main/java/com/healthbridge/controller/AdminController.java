@@ -22,7 +22,7 @@ import com.healthbridge.service.AdminService;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "https://healthbridge-frontend-jj1.onrender.com"})
 // @PreAuthorize("hasRole('ADMIN')") // Temporarily disabled for testing
 public class AdminController {
     

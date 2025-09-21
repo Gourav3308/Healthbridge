@@ -39,7 +39,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/appointment-booking")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201"})
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201", "https://healthbridge-frontend-jj1.onrender.com"})
 public class AppointmentBookingController {
     
     @Autowired

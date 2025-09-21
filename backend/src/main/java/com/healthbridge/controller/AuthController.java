@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "https://healthbridge-frontend-jj1.onrender.com"})
 public class AuthController {
     
     @Autowired

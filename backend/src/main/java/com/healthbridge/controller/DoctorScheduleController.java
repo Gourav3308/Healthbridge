@@ -24,7 +24,7 @@ import com.healthbridge.service.AppointmentSlotService;
 
 @RestController
 @RequestMapping("/api/doctor-schedule")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201"})
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201", "https://healthbridge-frontend-jj1.onrender.com"})
 public class DoctorScheduleController {
     
     @Autowired

@@ -28,7 +28,7 @@ import com.healthbridge.repository.PatientRepository;
 
 @RestController
 @RequestMapping("/api/patients")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201", "http://127.0.0.1:4200", "http://127.0.0.1:4201", "http://10.45.254.162:4200"})
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201", "http://127.0.0.1:4200", "http://127.0.0.1:4201", "http://10.45.254.162:4200", "https://healthbridge-frontend-jj1.onrender.com"})
 public class PatientController {
     
     @Autowired
