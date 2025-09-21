@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://healthbridge-backend.onrender.com/api',
-  razorpayKey: 'your-razorpay-key-id'
+  apiUrl: '${API_URL}/api',
+  razorpayKey: '${RAZORPAY_KEY_ID}'
 };
