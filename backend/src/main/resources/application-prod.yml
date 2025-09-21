@@ -8,9 +8,9 @@ spring:
     mode: console
   
   datasource:
-    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:Sonu@12345}
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -26,20 +26,20 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
-        connection:
-          url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-        jdbc:
-          url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-        connection:
-          provider_class: org.hibernate.connection.DriverManagerConnectionProvider
-          driver_class: com.mysql.cj.jdbc.Driver
-          url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-          username: ${DB_USERNAME:root}
-          password: ${DB_PASSWORD:Sonu@12345}
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.MySQLDialect
+            format_sql: true
+            connection:
+              url: ${DATABASE_URL}
+            jdbc:
+              url: ${DATABASE_URL}
+            connection:
+              provider_class: org.hibernate.connection.DriverManagerConnectionProvider
+              driver_class: com.mysql.cj.jdbc.Driver
+              url: ${DATABASE_URL}
+              username: ${DB_USERNAME}
+              password: ${DB_PASSWORD}
     database-platform: org.hibernate.dialect.MySQLDialect
   
   servlet:
