@@ -20,13 +20,13 @@ services:
       - key: MAIL_PASSWORD
         value: bisvrfctijbvfnbu
       - key: GOOGLE_CLIENT_ID
-        value: 468629260262-6ua09pru34mlsjerlvuhjocvn09mrlje.apps.googleusercontent.com
+        value: your-google-client-id
       - key: GOOGLE_CLIENT_SECRET
-        value: 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
+        value: your-google-client-secret
       - key: RAZORPAY_KEY_ID
-        value: rzp_test_ePOPRenR20mzsg
+        value: your-razorpay-key-id
       - key: RAZORPAY_SECRET
-        value: WLGtxuC251XBSyZiEwyIR3gA
+        value: your-razorpay-secret
 
   # Frontend Service
   - type: web

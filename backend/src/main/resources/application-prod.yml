@@ -50,8 +50,8 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:468629260262-6ua09pru34mlsjerlvuhjocvn09mrlje.apps.googleusercontent.com}
-            client-secret: ${GOOGLE_CLIENT_SECRET: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}
+            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
             scope: profile,email
 
 # JWT Configuration
@@ -75,8 +75,8 @@ cors:
 # Razorpay Configuration
 razorpay:
   key:
-    id: ${RAZORPAY_KEY_ID:rzp_test_ePOPRenR20mzsg}
-    secret: ${RAZORPAY_SECRET:WLGtxuC251XBSyZiEwyIR3gA}
+    id: ${RAZORPAY_KEY_ID:your-razorpay-key-id}
+    secret: ${RAZORPAY_SECRET:your-razorpay-secret}
 
 # Logging Configuration
 logging:
