@@ -10,6 +10,9 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:Sonu@12345}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
   
   jpa:
     hibernate:
@@ -83,8 +86,11 @@ logging:
   level:
     com.healthbridge: INFO
     org.springframework.security: WARN
-    org.hibernate.SQL: WARN
-    root: WARN
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG
+    root: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
