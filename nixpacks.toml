@@ -2,7 +2,7 @@
 cmds = ["cd backend && mvn clean package -DskipTests"]
 
 [phases.start]
-cmd = "cd backend && java -jar target/healthbridge-backend-1.0.0.jar"
+cmd = "cd backend && java -Dserver.port=$PORT -Dspring.profiles.active=prod -jar target/healthbridge-backend-1.0.0.jar"
 
 [variables]
-SPRING_PROFILES_ACTIVE = "production"
+SPRING_PROFILES_ACTIVE = "prod"

@@ -4,15 +4,20 @@ services:
     name: healthbridge-backend
     env: java
     plan: starter
-    buildCommand: cd backend && mvn clean install
-    startCommand: cd backend && java -jar target/healthbridge-backend-1.0.0.jar
+    rootDir: backend
+    buildCommand: mvn clean install -DskipTests
+    startCommand: java -Dserver.port=$PORT -jar target/healthbridge-backend-1.0.0.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
-        value: production
+        value: prod
+      - key: PORT
+        value: "8081"
       - key: DATABASE_URL
-        fromDatabase:
-          name: healthbridge-db
-          property: connectionString
+        value: # Add your Railway MySQL connection string here
+      - key: DB_USERNAME
+        value: # Add your Railway MySQL username here  
+      - key: DB_PASSWORD
+        value: # Add your Railway MySQL password here
       - key: JWT_SECRET
         generateValue: true
       - key: MAIL_USERNAME
@@ -27,23 +32,19 @@ services:
         value: your-razorpay-key-id
       - key: RAZORPAY_SECRET
         value: your-razorpay-secret
+      - key: CORS_ORIGINS
+        value: "https://healthbridge-frontend.onrender.com,http://localhost:4200"
 
   # Frontend Service
   - type: web
     name: healthbridge-frontend
     env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     envVars:
       - key: API_URL
         fromService:
           type: web
           name: healthbridge-backend
           property: host
-
-  # Database
-  - type: pserv
-    name: healthbridge-db
-    env: mysql
-    plan: starter
-    region: oregon

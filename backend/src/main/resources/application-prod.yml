@@ -8,13 +8,13 @@ spring:
     mode: console
   
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/healthbridge}
-    username: ${DB_USERNAME:postgres}
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthbridge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:password}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      jdbc-url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/healthbridge}
-      username: ${DB_USERNAME:postgres}
+      jdbc-url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthbridge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+      username: ${DB_USERNAME:root}
       password: ${DB_PASSWORD:password}
       maximum-pool-size: 5
       minimum-idle: 1
@@ -29,17 +29,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         connection:
-          url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/healthbridge}
-          username: ${DB_USERNAME:postgres}
-          password: ${DB_PASSWORD:password}
-          driver_class: org.postgresql.Driver
           provider_disables_autocommit: true
   
   servlet:
@@ -102,21 +98,14 @@ razorpay:
 # Logging Configuration
 logging:
   level:
-    com.healthbridge: DEBUG
+    com.healthbridge: INFO
     org.springframework.security: WARN
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.orm.jpa: DEBUG
-    org.springframework.boot.autoconfigure: DEBUG
-    org.springframework.boot.autoconfigure.jdbc: DEBUG
-    org.springframework.boot.autoconfigure.orm.jpa: DEBUG
-    org.hibernate.engine.jdbc: DEBUG
-    org.springframework.jdbc: DEBUG
-    com.zaxxer.hikari: DEBUG
-    com.mysql.cj: DEBUG
-    root: DEBUG
+    org.hibernate.SQL: WARN
+    org.springframework.boot.autoconfigure: WARN
+    com.zaxxer.hikari: WARN
+    com.mysql.cj: WARN
+    root: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   file:
     name: logs/healthbridge.log
