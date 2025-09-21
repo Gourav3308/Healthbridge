@@ -29,18 +29,30 @@ public class DatabaseConfig implements CommandLineRunner {
         System.out.println("Username: " + username);
         System.out.println("Password: " + (password != null ? "***" : "NULL"));
         
+        // Test basic JDBC connection
         try {
+            System.out.println("Loading MySQL driver...");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            System.out.println("MySQL driver loaded successfully!");
+            
             System.out.println("Attempting to connect to database...");
             Connection connection = DriverManager.getConnection(databaseUrl, username, password);
             System.out.println("✅ Database connection successful!");
             System.out.println("Database Product: " + connection.getMetaData().getDatabaseProductName());
             System.out.println("Database Version: " + connection.getMetaData().getDatabaseProductVersion());
+            System.out.println("Database URL: " + connection.getMetaData().getURL());
             connection.close();
+        } catch (ClassNotFoundException e) {
+            System.err.println("❌ MySQL driver not found!");
+            e.printStackTrace();
         } catch (SQLException e) {
             System.err.println("❌ Database connection failed!");
             System.err.println("Error: " + e.getMessage());
             System.err.println("SQL State: " + e.getSQLState());
             System.err.println("Error Code: " + e.getErrorCode());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ Unexpected error during database test!");
             e.printStackTrace();
         }
         System.out.println("=== END DATABASE TEST ===");
