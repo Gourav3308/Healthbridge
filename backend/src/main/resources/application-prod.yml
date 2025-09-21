@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: healthbridge-backend
+  banner:
+    mode: console
   
   datasource:
     url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
@@ -32,6 +34,12 @@ spring:
           url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
         jdbc:
           url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+        connection:
+          provider_class: org.hibernate.connection.DriverManagerConnectionProvider
+          driver_class: com.mysql.cj.jdbc.Driver
+          url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthprj?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+          username: ${DB_USERNAME:root}
+          password: ${DB_PASSWORD:Sonu@12345}
     database-platform: org.hibernate.dialect.MySQLDialect
   
   servlet:
