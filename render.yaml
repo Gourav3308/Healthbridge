@@ -6,7 +6,7 @@ services:
     plan: starter
     rootDir: backend
     buildCommand: mvn clean install -DskipTests
-    startCommand: java -Dserver.port=$PORT -jar target/healthbridge-backend-1.0.0.jar
+    startCommand: java -Dserver.port=$PORT -Dspring.profiles.active=prod -jar target/healthbridge-backend-1.0.0.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
