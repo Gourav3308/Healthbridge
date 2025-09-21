@@ -21,38 +21,57 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("=== OAUTH2 USER LOADING ===");
+        System.out.println("Registration ID: " + userRequest.getClientRegistration().getRegistrationId());
+        System.out.println("Client ID: " + userRequest.getClientRegistration().getClientId());
+        
         OAuth2User oauth2User = super.loadUser(userRequest);
+        System.out.println("OAuth2 User loaded successfully from Google");
+        System.out.println("User attributes: " + oauth2User.getAttributes().keySet());
         
         try {
-            return processOAuth2User(userRequest, oauth2User);
+            OAuth2User result = processOAuth2User(userRequest, oauth2User);
+            System.out.println("OAuth2 user processing completed successfully");
+            return result;
         } catch (Exception ex) {
+            System.err.println("❌ OAuth2 user processing failed: " + ex.getMessage());
+            ex.printStackTrace();
             throw new OAuth2AuthenticationException("OAuth2 authentication failed: " + ex.getMessage());
         }
     }
     
     private OAuth2User processOAuth2User(OAuth2UserRequest userRequest, OAuth2User oauth2User) {
+        System.out.println("=== PROCESSING OAUTH2 USER ===");
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         Map<String, Object> attributes = oauth2User.getAttributes();
+        System.out.println("Registration ID: " + registrationId);
+        System.out.println("User attributes: " + attributes);
         
         OAuth2UserInfo userInfo;
         if ("google".equals(registrationId)) {
             userInfo = new GoogleOAuth2UserInfo(attributes);
+            System.out.println("Google user info created - Email: " + userInfo.getEmail());
         } else {
+            System.err.println("❌ Unsupported OAuth2 provider: " + registrationId);
             throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + registrationId);
         }
         
         // Check if user exists by Google ID
+        System.out.println("Checking for existing user with Google ID: " + userInfo.getId());
         Optional<Patient> existingPatient = patientRepository.findByGoogleId(userInfo.getId());
         Patient patient;
         
         if (existingPatient.isPresent()) {
+            System.out.println("Found existing user with Google ID");
             patient = existingPatient.get();
             // Update user info if needed
             patient = updateExistingUser(patient, userInfo);
         } else {
+            System.out.println("No user found with Google ID, checking by email: " + userInfo.getEmail());
             // Check if user exists by email
             Optional<Patient> patientByEmail = patientRepository.findByEmail(userInfo.getEmail());
             if (patientByEmail.isPresent()) {
+                System.out.println("Found existing user with email, linking Google account");
                 // Link existing account with Google
                 patient = patientByEmail.get();
                 patient.setGoogleId(userInfo.getId());
@@ -64,9 +83,12 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
                     patient.setProfileImageUrl(userInfo.getImageUrl());
                 }
                 patient = patientRepository.save(patient);
+                System.out.println("Successfully linked existing account with Google");
             } else {
+                System.out.println("Creating new user from Google OAuth");
                 // Create new user
                 patient = createNewUser(userInfo);
+                System.out.println("New user created successfully with ID: " + patient.getId());
             }
         }
         
