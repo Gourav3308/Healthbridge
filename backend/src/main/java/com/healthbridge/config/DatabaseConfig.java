@@ -44,15 +44,25 @@ public class DatabaseConfig {
     @Bean
     public void testDatabaseConnection() {
         try {
-            System.out.println("Testing database connection...");
-            System.out.println("URL: " + databaseUrl);
-            System.out.println("Username: " + username);
+            System.out.println("=== DATABASE CONNECTION TEST ===");
+            System.out.println("DATABASE_URL from environment: " + databaseUrl);
+            System.out.println("DB_USERNAME from environment: " + username);
+            System.out.println("DB_PASSWORD from environment: " + (password != null ? "***SET***" : "NULL"));
+            
+            // Test if we can parse the URL
+            if (databaseUrl != null && databaseUrl.startsWith("mysql://")) {
+                System.out.println("Database URL format looks correct");
+            } else {
+                System.err.println("WARNING: Database URL format may be incorrect: " + databaseUrl);
+            }
             
             Connection connection = DriverManager.getConnection(databaseUrl, username, password);
-            System.out.println("Database connection successful!");
+            System.out.println("✅ Database connection successful!");
             connection.close();
         } catch (SQLException e) {
-            System.err.println("Database connection failed: " + e.getMessage());
+            System.err.println("❌ Database connection failed: " + e.getMessage());
+            System.err.println("URL attempted: " + databaseUrl);
+            System.err.println("Username attempted: " + username);
             e.printStackTrace();
         }
     }
