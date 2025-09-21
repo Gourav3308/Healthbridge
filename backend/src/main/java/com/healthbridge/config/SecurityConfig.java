@@ -23,6 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.healthbridge.security.CustomUserDetailsService;
 import com.healthbridge.security.JwtAuthenticationFilter;
 import com.healthbridge.security.OAuth2AuthenticationSuccessHandler;
+import com.healthbridge.security.OAuth2AuthenticationFailureHandler;
 import com.healthbridge.security.OAuth2UserService;
 
 @Configuration
@@ -41,6 +42,9 @@ public class SecurityConfig {
     
     @Autowired
     private OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+    
+    @Autowired
+    private OAuth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -110,6 +114,7 @@ public class SecurityConfig {
                     .userService(oauth2UserService)
                 )
                 .successHandler(oauth2AuthenticationSuccessHandler)
+                .failureHandler(oauth2AuthenticationFailureHandler)
             );
         
         http.authenticationProvider(authenticationProvider());
