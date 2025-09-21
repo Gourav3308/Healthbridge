@@ -7,19 +7,13 @@ spring:
   banner:
     mode: console
   
-  # Disable JPA/Hibernate temporarily to test basic database connection
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
-  
   datasource:
-    url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
+    url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: wHZXIDkxfIhahvxrWjAPIKJLRTeUboOc
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      jdbc-url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
+      jdbc-url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       username: root
       password: wHZXIDkxfIhahvxrWjAPIKJLRTeUboOc
       maximum-pool-size: 5
@@ -31,6 +25,22 @@ spring:
   sql:
     init:
       mode: always
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        connection:
+          url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+          username: root
+          password: wHZXIDkxfIhahvxrWjAPIKJLRTeUboOc
+          driver_class: com.mysql.cj.jdbc.Driver
+          provider_disables_autocommit: true
   
   servlet:
     multipart:
