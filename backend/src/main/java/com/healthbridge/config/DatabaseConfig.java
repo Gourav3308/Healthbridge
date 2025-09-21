@@ -31,9 +31,17 @@ public class DatabaseConfig implements CommandLineRunner {
         
         // Test basic JDBC connection
         try {
-            System.out.println("Loading MySQL driver...");
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            System.out.println("MySQL driver loaded successfully!");
+            System.out.println("Loading database driver...");
+            if (databaseUrl.contains("postgresql")) {
+                Class.forName("org.postgresql.Driver");
+                System.out.println("PostgreSQL driver loaded successfully!");
+            } else if (databaseUrl.contains("mysql")) {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                System.out.println("MySQL driver loaded successfully!");
+            } else {
+                System.err.println("❌ Unknown database type in URL!");
+                return;
+            }
             
             System.out.println("Attempting to connect to database...");
             Connection connection = DriverManager.getConnection(databaseUrl, username, password);
@@ -43,7 +51,7 @@ public class DatabaseConfig implements CommandLineRunner {
             System.out.println("Database URL: " + connection.getMetaData().getURL());
             connection.close();
         } catch (ClassNotFoundException e) {
-            System.err.println("❌ MySQL driver not found!");
+            System.err.println("❌ Database driver not found!");
             e.printStackTrace();
         } catch (SQLException e) {
             System.err.println("❌ Database connection failed!");
