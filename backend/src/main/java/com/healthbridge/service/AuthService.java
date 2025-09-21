@@ -176,7 +176,7 @@ public class AuthService {
         String resetToken = jwtUtil.generatePasswordResetToken(email);
         
         // Send reset email
-        String resetLink = "http://localhost:4200/auth/reset-password?token=" + resetToken;
+        String resetLink = "https://healthbridge-frontend-jj1.onrender.com/auth/reset-password?token=" + resetToken;
         
         try {
             emailService.sendPasswordResetEmail(email, resetLink, 

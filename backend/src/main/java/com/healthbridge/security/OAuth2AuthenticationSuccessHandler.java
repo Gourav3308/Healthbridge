@@ -34,7 +34,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // Generate JWT token
         String token = jwtUtil.generateToken(oauth2User.getEmail(), oauth2User.getRole(), oauth2User.getUserId());
         
-        // Build redirect URL with token and user info
+        // Build redirect URL with token and user info  
         String targetUrl = UriComponentsBuilder.fromUriString("https://healthbridge-frontend-jj1.onrender.com/auth/callback")
                 .queryParam("token", token)
                 .queryParam("userId", oauth2User.getUserId())
