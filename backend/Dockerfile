@@ -8,10 +8,10 @@ RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Copy pom.xml first for better layer caching
-COPY pom.xml .
+COPY backend/pom.xml .
 
 # Copy source code
-COPY src ./src
+COPY backend/src ./src
 
 # Build the application
 RUN mvn clean package -DskipTests
