@@ -1,0 +1,10 @@
+target/
+!target/healthbridge-backend-1.0.0.jar
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+logs/
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.iml
