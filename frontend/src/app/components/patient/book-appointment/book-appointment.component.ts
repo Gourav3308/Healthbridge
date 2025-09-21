@@ -8,6 +8,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
 import { NotificationService } from '../../../services/notification.service';
+import { environment } from '../../../../environments/environment';
 import { ScheduleService } from '../../../services/schedule.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
@@ -976,7 +977,7 @@ export class BookAppointmentComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading available slots:', error);
-        console.error('API URL:', `http://localhost:8081/api/api/doctor-schedule/doctor/${doctorId}/available-slots?date=${date}`);
+        console.error('API URL:', `${environment.apiUrl}/doctor-schedule/doctor/${doctorId}/available-slots?date=${date}`);
         this.loadingSlots = false;
         this.notificationService.error('Error', 'Failed to load available time slots');
       }

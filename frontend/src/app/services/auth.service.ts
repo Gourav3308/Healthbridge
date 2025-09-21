@@ -2,12 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthRequest, AuthResponse, DoctorRegistrationRequest, PatientRegistrationRequest } from '../models/user.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://10.45.254.162:8081/api';
+  private apiUrl = environment.apiUrl;
   private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private tokenValidationCache = new Map<string, boolean>();
@@ -164,7 +165,8 @@ export class AuthService {
   // Google OAuth2 Methods
   loginWithGoogle(): void {
     // Redirect to backend OAuth2 endpoint
-    window.location.href = `http://localhost:8081/oauth2/authorization/google`;
+    const backendUrl = environment.apiUrl.replace('/api', '');
+    window.location.href = `${backendUrl}/oauth2/authorization/google`;
   }
 
   handleOAuth2Callback(token: string, userData: any): void {
