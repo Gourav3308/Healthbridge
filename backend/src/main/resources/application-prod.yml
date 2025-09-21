@@ -8,12 +8,12 @@ spring:
     mode: console
   
   datasource:
-    url: ${DATABASE_URL}
+    url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      jdbc-url: ${DATABASE_URL}
+      jdbc-url: jdbc:mysql://tramway.proxy.rlwy.net:23911/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       username: ${DB_USERNAME}
       password: ${DB_PASSWORD}
       maximum-pool-size: 10
