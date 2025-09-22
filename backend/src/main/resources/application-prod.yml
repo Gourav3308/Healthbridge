@@ -28,9 +28,7 @@ spring:
           auth: true
           starttls:
             enable: true
-
-# OAuth2 Configuration
-spring:
+  # OAuth2 Configuration
   security:
     oauth2:
       client:
