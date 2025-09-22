@@ -95,9 +95,18 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetConfirmRequest request) {
         try {
+            System.out.println("=== PASSWORD RESET DEBUG ===");
+            System.out.println("Received reset password request");
+            System.out.println("Token: " + request.getToken());
+            System.out.println("New password length: " + (request.getNewPassword() != null ? request.getNewPassword().length() : "null"));
+            
             authService.confirmPasswordReset(request.getToken(), request.getNewPassword());
+            
+            System.out.println("✅ Password reset successful");
             return ResponseEntity.ok().body("{\"message\": \"Password reset successfully. You can now login with your new password.\"}");
         } catch (Exception e) {
+            System.err.println("❌ Password reset failed: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("{\"error\": \"Invalid or expired reset token.\"}");
         }
     }

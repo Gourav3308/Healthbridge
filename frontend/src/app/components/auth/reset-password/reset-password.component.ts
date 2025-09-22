@@ -270,9 +270,15 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit(): void {
     // Get token from URL parameters
     this.route.queryParams.subscribe(params => {
+      console.log('Reset password component - Query params:', params);
       this.resetToken = params['token'];
+      console.log('Reset password component - Token extracted:', this.resetToken);
+      
       if (!this.resetToken) {
+        console.log('Reset password component - No token found, marking as invalid');
         this.invalidToken = true;
+      } else {
+        console.log('Reset password component - Token found, form will be shown');
       }
     });
 
@@ -324,11 +330,16 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log('Reset password form submitted');
+    console.log('Form valid:', this.resetPasswordForm.valid);
+    console.log('Reset token:', this.resetToken);
+    
     if (this.resetPasswordForm.valid) {
       this.isLoading = true;
       this.errorMessage = '';
 
       const newPassword = this.resetPasswordForm.value.newPassword;
+      console.log('Sending reset password request with token:', this.resetToken);
 
       this.authService.resetPassword(this.resetToken, newPassword).subscribe({
         next: (response) => {

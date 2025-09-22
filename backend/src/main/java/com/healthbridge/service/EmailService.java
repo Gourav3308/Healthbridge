@@ -122,7 +122,7 @@ public class EmailService {
                 "Best regards,\n" +
                 "🏥 HealthBridge Medical Center Team\n" +
                 "📧 Email: healthbridge13012002@gmail.com\n" +
-                "🌐 Website: https://healthbridge-frontend-jj1.onrender.com\n\n" +
+                "🌐 Website: https://healthbridge-frontend-jj1l.onrender.com\n\n" +
                 "Thank you for choosing HealthBridge for your healthcare needs!",
                 
                 appointment.getPatient().getFirstName(), 
@@ -263,7 +263,7 @@ public class EmailService {
                 "Best regards,\n" +
                 "🏥 HealthBridge Medical Center Team\n" +
                 "📧 Email: healthbridge13012002@gmail.com\n" +
-                "🌐 Website: https://healthbridge-frontend-jj1.onrender.com\n\n" +
+                "🌐 Website: https://healthbridge-frontend-jj1l.onrender.com\n\n" +
                 "Thank you for choosing HealthBridge for your healthcare needs!",
                 
                 userName,

@@ -176,7 +176,7 @@ public class AuthService {
         String resetToken = jwtUtil.generatePasswordResetToken(email);
         
         // Send reset email
-        String resetLink = "https://healthbridge-frontend-jj1.onrender.com/auth/reset-password?token=" + resetToken;
+        String resetLink = "https://healthbridge-frontend-jj1l.onrender.com/auth/reset-password?token=" + resetToken;
         
         try {
             emailService.sendPasswordResetEmail(email, resetLink, 
@@ -193,10 +193,16 @@ public class AuthService {
     
     public void confirmPasswordReset(String token, String newPassword) {
         try {
+            System.out.println("=== CONFIRM PASSWORD RESET DEBUG ===");
+            System.out.println("Token received: " + token);
+            System.out.println("New password length: " + (newPassword != null ? newPassword.length() : "null"));
+            
             // Validate token and extract email
             String email = jwtUtil.extractEmailFromPasswordResetToken(token);
+            System.out.println("Email extracted from token: " + email);
             
             if (email == null) {
+                System.out.println("❌ No email extracted from token - invalid or expired");
                 throw new RuntimeException("Invalid or expired reset token");
             }
             
