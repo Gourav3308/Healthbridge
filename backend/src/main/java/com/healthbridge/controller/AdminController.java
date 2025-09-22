@@ -1,6 +1,8 @@
 package com.healthbridge.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -199,6 +201,43 @@ public class AdminController {
             return ResponseEntity.ok("Slots generated successfully for all approved doctors");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to generate slots: " + e.getMessage());
+        }
+    }
+    
+    // Test endpoint to check slot generation for a specific doctor
+    @GetMapping("/test-slots/{doctorId}")
+    public ResponseEntity<?> testSlotsForDoctor(@PathVariable Long doctorId) {
+        try {
+            // Check if doctor exists and is approved
+            Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+            if (doctorOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Doctor not found with ID: " + doctorId);
+            }
+            
+            Doctor doctor = doctorOpt.get();
+            if (!doctor.getIsApproved()) {
+                return ResponseEntity.badRequest().body("Doctor is not approved: " + doctor.getEmail());
+            }
+            
+            // Check existing slots
+            long existingSlots = appointmentSlotRepository.countByDoctorIdAndIsActive(doctorId, true);
+            
+            // Generate slots if none exist
+            if (existingSlots == 0) {
+                appointmentSlotService.createDefaultScheduleForDoctor(doctorId);
+                existingSlots = appointmentSlotRepository.countByDoctorIdAndIsActive(doctorId, true);
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "doctorId", doctorId,
+                "doctorEmail", doctor.getEmail(),
+                "isApproved", doctor.getIsApproved(),
+                "existingSlots", existingSlots,
+                "message", "Slot generation completed"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 }
