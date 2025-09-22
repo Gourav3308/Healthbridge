@@ -13,7 +13,6 @@ import com.healthbridge.dto.DoctorUpdateRequest;
 import com.healthbridge.dto.PatientUpdateRequest;
 import com.healthbridge.entity.Admin;
 import com.healthbridge.entity.Appointment;
-import com.healthbridge.entity.AppointmentStatus;
 import com.healthbridge.entity.Doctor;
 import com.healthbridge.entity.DoctorReview;
 import com.healthbridge.entity.Patient;
