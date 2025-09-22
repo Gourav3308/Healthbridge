@@ -126,7 +126,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:4200", "http://localhost:4201", "http://localhost:3000", "http://127.0.0.1:4200", "http://127.0.0.1:4201", "http://10.45.254.162:4200", "https://healthbridge-frontend-jj1.onrender.com"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:4200", "http://localhost:4201", "http://localhost:3000", "http://127.0.0.1:4200", "http://127.0.0.1:4201", "http://10.45.254.162:4200", "https://healthbridge-frontend-jj1l.onrender.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
