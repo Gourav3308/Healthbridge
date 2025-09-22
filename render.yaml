@@ -38,10 +38,10 @@ services:
   # Frontend Service
   - type: web
     name: healthbridge-frontend
-    env: static
+    env: node
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    startCommand: npm run serve
     headers:
       - path: /*
         name: X-Frame-Options
@@ -55,6 +55,9 @@ services:
       - path: /_redirects
         name: Content-Type
         value: text/plain
+      - path: /*
+        name: Cache-Control
+        value: no-cache
     routes:
       - type: rewrite
         source: /*
