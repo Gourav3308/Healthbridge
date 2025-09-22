@@ -38,19 +38,15 @@ app.get('/auth/*', (req, res) => {
   console.log('Index path:', indexPath);
   console.log('Index exists:', fs.existsSync(indexPath));
   
-  if (fs.existsSync(indexPath)) {
-    // Set proper headers for SPA
-    res.setHeader('Content-Type', 'text/html');
-    res.sendFile(indexPath);
-  } else {
-    console.error('Index.html not found for auth route');
-    const fallbackPath = path.join(__dirname, 'fallback.html');
-    if (fs.existsSync(fallbackPath)) {
-      res.sendFile(fallbackPath);
+  // Always serve the Angular app for auth routes
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error serving index.html for auth route:', err);
+      res.status(500).send('Error loading application');
     } else {
-      res.status(500).send('Application not built properly - index.html not found');
+      console.log('Successfully served Angular app for auth route:', req.path);
     }
-  }
+  });
 });
 
 // Handle SPA routing - serve index.html for all routes that don't match static files

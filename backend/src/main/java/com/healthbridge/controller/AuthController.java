@@ -110,4 +110,27 @@ public class AuthController {
             return ResponseEntity.badRequest().body("{\"error\": \"Invalid or expired reset token.\"}");
         }
     }
+    
+    // Test endpoint to check URL generation
+    @GetMapping("/test-reset-url")
+    public ResponseEntity<?> testResetUrl(@RequestParam String email) {
+        try {
+            System.out.println("=== TEST RESET URL DEBUG ===");
+            System.out.println("Testing reset URL generation for email: " + email);
+            
+            // Generate a test token
+            String testToken = "test-token-12345";
+            
+            // Simple hardcoded URL
+            String resetLink = "https://healthbridge-frontend-jj1l.onrender.com/auth/reset-password?token=" + testToken;
+            
+            System.out.println("Generated test reset link: " + resetLink);
+            
+            return ResponseEntity.ok().body("{\"testUrl\": \"" + resetLink + "\", \"message\": \"Test URL generated successfully\"}");
+        } catch (Exception e) {
+            System.err.println("❌ Test URL generation failed: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("{\"error\": \"Test URL generation failed.\"}");
+        }
+    }
 }

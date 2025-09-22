@@ -182,19 +182,11 @@ public class AuthService {
         // Generate reset token (valid for 1 hour)
         String resetToken = jwtUtil.generatePasswordResetToken(email);
         
-        // Send reset email
-        // Use fallback URL if frontend URL is null or empty
-        String effectiveFrontendUrl = (frontendUrl != null && !frontendUrl.trim().isEmpty()) ? frontendUrl : FALLBACK_FRONTEND_URL;
-        
-        // Ensure frontend URL doesn't end with slash to avoid double slashes
-        String cleanFrontendUrl = effectiveFrontendUrl.endsWith("/") ? effectiveFrontendUrl.substring(0, effectiveFrontendUrl.length() - 1) : effectiveFrontendUrl;
-        String resetLink = cleanFrontendUrl + "/auth/reset-password?token=" + resetToken;
+        // Send reset email - SIMPLE HARDCODED SOLUTION
+        String resetLink = "https://healthbridge-frontend-jj1l.onrender.com/auth/reset-password?token=" + resetToken;
         
         // Debug logging
         System.out.println("=== PASSWORD RESET URL DEBUG ===");
-        System.out.println("Frontend URL from config: " + frontendUrl);
-        System.out.println("Effective frontend URL: " + effectiveFrontendUrl);
-        System.out.println("Clean frontend URL: " + cleanFrontendUrl);
         System.out.println("Reset token: " + resetToken);
         System.out.println("Generated reset link: " + resetLink);
         
