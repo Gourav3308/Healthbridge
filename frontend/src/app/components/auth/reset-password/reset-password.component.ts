@@ -272,6 +272,7 @@ export class ResetPasswordComponent implements OnInit {
     console.log('Current URL:', window.location.href);
     console.log('Current path:', window.location.pathname);
     console.log('Current search:', window.location.search);
+    console.log('Full location object:', window.location);
     
     // Get token from URL parameters
     this.route.queryParams.subscribe(params => {

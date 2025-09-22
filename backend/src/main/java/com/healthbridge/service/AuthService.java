@@ -1,6 +1,7 @@
 package com.healthbridge.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,6 +46,9 @@ public class AuthService {
     
     @Autowired
     private EmailService emailService;
+    
+    @Value("${frontend.url:https://healthbridge-frontend-jj1l.onrender.com}")
+    private String frontendUrl;
     
     public AuthResponse authenticate(AuthRequest request) {
         try {
@@ -176,7 +180,7 @@ public class AuthService {
         String resetToken = jwtUtil.generatePasswordResetToken(email);
         
         // Send reset email
-        String resetLink = "https://healthbridge-frontend-jj1l.onrender.com/auth/reset-password?token=" + resetToken;
+        String resetLink = frontendUrl + "/auth/reset-password?token=" + resetToken;
         
         try {
             emailService.sendPasswordResetEmail(email, resetLink, 

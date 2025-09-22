@@ -39,6 +39,10 @@ cors:
   allowed-headers: "*"
   allow-credentials: true
 
+# Frontend URL Configuration
+frontend:
+  url: ${FRONTEND_URL:https://healthbridge-frontend-jj1l.onrender.com}
+
 # Razorpay Configuration
 razorpay:
   key:

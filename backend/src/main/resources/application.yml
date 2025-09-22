@@ -76,6 +76,10 @@ cors:
   allowed-headers: "*"
   allow-credentials: true
 
+# Frontend URL Configuration
+frontend:
+  url: http://localhost:4200
+
 
 # Razorpay Configuration
 razorpay:
