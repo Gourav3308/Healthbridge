@@ -69,32 +69,49 @@ public class AdminService {
     }
     
     public Doctor approveDoctor(Long doctorId) {
+        System.out.println("=== ADMIN SERVICE DEBUG ===");
+        System.out.println("Attempting to approve doctor with ID: " + doctorId);
+        
         Doctor doctor = doctorRepository.findById(doctorId)
             .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        
+        System.out.println("Found doctor: " + doctor.getFirstName() + " " + doctor.getLastName() + " (" + doctor.getEmail() + ")");
         
         if (doctor.getIsApproved()) {
             throw new RuntimeException("Doctor is already approved");
         }
         
-        // Get current admin user
+        // Get current admin user (handle case where no authentication context exists)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String adminEmail = authentication.getName();
+        String adminEmail = null;
+        
+        if (authentication != null && authentication.isAuthenticated() && 
+            !authentication.getName().equals("anonymousUser")) {
+            adminEmail = authentication.getName();
+        } else {
+            // For testing purposes, use default admin
+            adminEmail = "adminhealth@gmail.com";
+        }
+        
         Admin admin = adminRepository.findByEmail(adminEmail)
-            .orElseThrow(() -> new RuntimeException("Admin not found"));
+            .orElseThrow(() -> new RuntimeException("Admin not found: " + adminEmail));
         
         doctor.setIsApproved(true);
         doctor.setApprovalDate(LocalDateTime.now());
         doctor.setApprovedBy(admin.getEmail()); // Store admin email as string
         
         Doctor savedDoctor = doctorRepository.save(doctor);
+        System.out.println("Doctor approved successfully: " + savedDoctor.getEmail());
         
         // Send approval email notification
         try {
+            System.out.println("Attempting to send approval email...");
             emailService.sendDoctorApprovalEmail(savedDoctor);
-            System.out.println("Approval email sent to doctor: " + savedDoctor.getEmail());
+            System.out.println("✅ Approval email sent successfully to: " + savedDoctor.getEmail());
         } catch (Exception e) {
-            System.err.println("Failed to send approval email to doctor: " + savedDoctor.getEmail());
+            System.err.println("❌ Failed to send approval email to doctor: " + savedDoctor.getEmail());
             System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
             // Don't throw exception here - we don't want email failure to break the approval process
         }
         

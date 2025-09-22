@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Doctor } from '../../../models/doctor.model';
 import { AdminService } from '../../../services/admin.service';
 import { AuthService } from '../../../services/auth.service';
@@ -398,7 +398,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -504,12 +505,12 @@ export class DashboardComponent implements OnInit {
 
   managePatients(): void {
     // Navigate to patient management page
-    window.location.href = '/admin/manage-patients';
+    this.router.navigate(['/admin/patients']);
   }
 
   manageDoctors(): void {
     // Navigate to doctor management page
-    window.location.href = '/admin/manage-doctors';
+    this.router.navigate(['/admin/doctors']);
   }
 
   viewAnalytics(): void {

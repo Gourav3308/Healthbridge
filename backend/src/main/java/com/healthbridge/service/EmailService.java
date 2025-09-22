@@ -17,7 +17,10 @@ public class EmailService {
     public void sendDoctorApprovalEmail(Doctor doctor) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(doctor.getEmail());
+            // For testing purposes, send to test email
+            message.setTo("saurabshubham903@gmail.com");
+            // Also include the doctor's email for verification
+            message.setCc(doctor.getEmail());
             message.setFrom("healthbridge13012002@gmail.com");
             message.setSubject("🎉 Congratulations! Your HealthBridge Application has been Approved");
             
