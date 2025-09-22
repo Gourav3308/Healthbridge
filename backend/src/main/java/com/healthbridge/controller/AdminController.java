@@ -20,7 +20,10 @@ import com.healthbridge.dto.DoctorUpdateRequest;
 import com.healthbridge.dto.PatientUpdateRequest;
 import com.healthbridge.entity.Doctor;
 import com.healthbridge.entity.Patient;
+import com.healthbridge.repository.DoctorRepository;
+import com.healthbridge.repository.AppointmentSlotRepository;
 import com.healthbridge.service.AdminService;
+import com.healthbridge.service.AppointmentSlotService;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -30,6 +33,15 @@ public class AdminController {
     
     @Autowired
     private AdminService adminService;
+    
+    @Autowired
+    private DoctorRepository doctorRepository;
+    
+    @Autowired
+    private AppointmentSlotRepository appointmentSlotRepository;
+    
+    @Autowired
+    private AppointmentSlotService appointmentSlotService;
     
     @GetMapping("/doctors/pending")
     public ResponseEntity<List<Doctor>> getPendingDoctors() {

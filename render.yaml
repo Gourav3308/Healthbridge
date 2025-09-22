@@ -33,7 +33,7 @@ services:
       - key: RAZORPAY_SECRET
         value: your-razorpay-secret
       - key: CORS_ORIGINS
-        value: "https://healthbridge-frontend.onrender.com,http://localhost:4200"
+        value: "https://healthbridge-frontend-jj1l.onrender.com,http://localhost:4200"
 
   # Frontend Service
   - type: web
