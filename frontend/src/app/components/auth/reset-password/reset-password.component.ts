@@ -268,6 +268,11 @@ export class ResetPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('=== RESET PASSWORD COMPONENT INITIALIZED ===');
+    console.log('Current URL:', window.location.href);
+    console.log('Current path:', window.location.pathname);
+    console.log('Current search:', window.location.search);
+    
     // Get token from URL parameters
     this.route.queryParams.subscribe(params => {
       console.log('Reset password component - Query params:', params);
@@ -279,8 +284,18 @@ export class ResetPasswordComponent implements OnInit {
         this.invalidToken = true;
       } else {
         console.log('Reset password component - Token found, form will be shown');
+        console.log('Token length:', this.resetToken.length);
+        console.log('Token preview:', this.resetToken.substring(0, 50) + '...');
       }
     });
+    
+    // Also check if we can access the route data
+    this.route.data.subscribe(data => {
+      console.log('Reset password component - Route data:', data);
+    });
+    
+    // Check if the component is being loaded at all
+    console.log('Reset password component - Component loaded successfully');
 
     this.resetPasswordForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(6)]],

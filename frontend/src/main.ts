@@ -8,6 +8,11 @@ import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { AuthInterceptor } from './app/services/auth.interceptor';
 
+console.log('=== ANGULAR APP BOOTSTRAPPING ===');
+console.log('Current URL:', window.location.href);
+console.log('Current path:', window.location.pathname);
+console.log('Current search:', window.location.search);
+
 bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(
@@ -21,4 +26,8 @@ bootstrapApplication(AppComponent, {
       multi: true
     }
   ]
-}).catch(err => console.error(err));
+}).then(() => {
+  console.log('=== ANGULAR APP BOOTSTRAPPED SUCCESSFULLY ===');
+}).catch(err => {
+  console.error('=== ANGULAR APP BOOTSTRAP FAILED ===', err);
+});

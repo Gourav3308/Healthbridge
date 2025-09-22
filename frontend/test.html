@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthBridge Test Page</title>
+</head>
+<body>
+    <h1>HealthBridge Test Page</h1>
+    <p>If you can see this page, the server is working!</p>
+    <p>Current URL: <span id="current-url"></span></p>
+    <p>Current Path: <span id="current-path"></span></p>
+    <p>Current Search: <span id="current-search"></span></p>
+    
+    <script>
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('current-path').textContent = window.location.pathname;
+        document.getElementById('current-search').textContent = window.location.search;
+        
+        console.log('=== TEST PAGE LOADED ===');
+        console.log('Current URL:', window.location.href);
+        console.log('Current path:', window.location.pathname);
+        console.log('Current search:', window.location.search);
+    </script>
+</body>
+</html>
