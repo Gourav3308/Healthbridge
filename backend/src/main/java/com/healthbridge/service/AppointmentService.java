@@ -139,6 +139,34 @@ public class AppointmentService {
             System.out.println("=== APPOINTMENT CONFIRMATION DEBUG COMPLETE ===");
         }
         
+        // Send rejection email if status changed to CANCELLED
+        if (status == AppointmentStatus.CANCELLED && previousStatus != AppointmentStatus.CANCELLED) {
+            try {
+                System.out.println("=== APPOINTMENT REJECTION DEBUG ===");
+                System.out.println("Appointment ID: " + updatedAppointment.getId());
+                System.out.println("Patient Email: " + updatedAppointment.getPatientEmail());
+                System.out.println("Patient Name: " + updatedAppointment.getPatient().getFirstName() + " " + updatedAppointment.getPatient().getLastName());
+                System.out.println("Doctor Name: " + updatedAppointment.getDoctor().getFirstName() + " " + updatedAppointment.getDoctor().getLastName());
+                System.out.println("Previous Status: " + previousStatus);
+                System.out.println("New Status: " + status);
+                
+                emailService.sendAppointmentRejection(updatedAppointment);
+                
+                System.out.println("✅ Rejection email sent successfully");
+                
+            } catch (Exception emailError) {
+                System.err.println("❌ EMAIL FAILURE: Failed to send rejection email");
+                System.err.println("Error: " + emailError.getMessage());
+                emailError.printStackTrace();
+                
+                // Log the failure but don't fail the status update
+                System.err.println("⚠️ WARNING: Appointment status updated but rejection email notification failed");
+                System.err.println("⚠️ Patient email: " + updatedAppointment.getPatientEmail());
+            }
+            
+            System.out.println("=== APPOINTMENT REJECTION DEBUG COMPLETE ===");
+        }
+        
         return updatedAppointment;
     }
     

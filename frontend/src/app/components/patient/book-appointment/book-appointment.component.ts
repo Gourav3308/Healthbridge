@@ -1107,16 +1107,28 @@ export class BookAppointmentComponent implements OnInit {
         console.log('Payment verified:', response);
         
         if (response.success) {
-          this.notificationService.success('Success', response.message);
+          // Show professional success message
+          this.notificationService.success(
+            '🎉 Payment Successful!', 
+            'Your payment has been processed successfully. Please check your registered email for appointment confirmation once the doctor approves your booking. Thank you for choosing HealthBridge!'
+          );
           
-          // Show success message and redirect
+          // Show additional professional message
+          setTimeout(() => {
+            this.notificationService.info(
+              '📧 Email Notification', 
+              'A confirmation email will be sent to your registered email address once the doctor reviews and approves your appointment. Please check your inbox and spam folder.'
+            );
+          }, 1000);
+          
+          // Redirect after showing messages
           setTimeout(() => {
             this.router.navigate(['/patient/appointments'], {
               queryParams: { appointmentId: response.appointmentId }
             });
-          }, 2000);
+          }, 4000);
         } else {
-          this.notificationService.error('Error', 'Payment verification failed');
+          this.notificationService.error('Payment Failed', 'Payment verification failed. Please contact support if the amount was deducted.');
         }
       },
       error: (error) => {

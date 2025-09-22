@@ -1,6 +1,8 @@
 package com.healthbridge.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -71,14 +73,43 @@ public class AppointmentController {
     
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('DOCTOR') or hasRole('PATIENT')")
-    public ResponseEntity<Appointment> updateAppointmentStatus(
+    public ResponseEntity<?> updateAppointmentStatus(
             @PathVariable Long id, 
             @RequestParam AppointmentStatus status) {
         try {
+            System.out.println("=== APPOINTMENT STATUS UPDATE DEBUG ===");
+            System.out.println("Appointment ID: " + id);
+            System.out.println("New Status: " + status);
+            
             Appointment appointment = appointmentService.updateAppointmentStatus(id, status);
-            return ResponseEntity.ok(appointment);
+            
+            System.out.println("✅ Appointment status updated successfully");
+            System.out.println("Patient Email: " + appointment.getPatientEmail());
+            System.out.println("Doctor Name: " + appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName());
+            
+            // Return success response with appointment details
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("appointment", appointment);
+            response.put("message", "Appointment status updated successfully");
+            
+            if (status == AppointmentStatus.CONFIRMED) {
+                response.put("emailMessage", "Confirmation email sent to patient");
+            } else if (status == AppointmentStatus.CANCELLED) {
+                response.put("emailMessage", "Cancellation notification sent to patient");
+            }
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("❌ Error updating appointment status: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to update appointment status: " + e.getMessage());
+            
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 }

@@ -166,6 +166,74 @@ public class EmailService {
         }
     }
     
+    public void sendAppointmentRejection(Appointment appointment) {
+        try {
+            System.out.println("=== APPOINTMENT REJECTION EMAIL DEBUG ===");
+            System.out.println("Sending appointment rejection email to: " + appointment.getPatientEmail());
+            System.out.println("Patient Name: " + appointment.getPatient().getFirstName() + " " + appointment.getPatient().getLastName());
+            System.out.println("Doctor Name: " + appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName());
+            System.out.println("Appointment Date: " + appointment.getAppointmentDate());
+            System.out.println("Appointment Time: " + appointment.getAppointmentTime());
+            
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(appointment.getPatientEmail());
+            message.setFrom("healthbridge13012002@gmail.com");
+            message.setSubject("❌ Appointment Update - HealthBridge Medical Center");
+            
+            String emailBody = String.format(
+                "Dear %s %s,\n\n" +
+                "We hope this message finds you well. We are writing to inform you about an update regarding your appointment request.\n\n" +
+                "📋 Appointment Details:\n" +
+                "• Doctor: Dr. %s %s\n" +
+                "• Date: %s\n" +
+                "• Time: %s\n" +
+                "• Specialization: %s\n" +
+                "• Consultation Fee: Rs.%.2f\n\n" +
+                "❌ Status Update:\n" +
+                "Unfortunately, we are unable to accommodate your appointment request at the requested time. This could be due to:\n" +
+                "• Doctor's schedule changes\n" +
+                "• Emergency cases requiring immediate attention\n" +
+                "• Unforeseen circumstances\n\n" +
+                "🔄 Next Steps:\n" +
+                "• Please log in to your HealthBridge account to reschedule your appointment\n" +
+                "• You can choose from available time slots that work for you\n" +
+                "• Your payment will be refunded within 3-5 business days\n" +
+                "• If you need assistance, please contact our support team\n\n" +
+                "We sincerely apologize for any inconvenience this may cause and appreciate your understanding.\n\n" +
+                "Thank you for choosing HealthBridge for your healthcare needs.\n\n" +
+                "Best regards,\n" +
+                "🏥 HealthBridge Medical Center Team\n" +
+                "📧 Email: healthbridge13012002@gmail.com\n" +
+                "🌐 Website: https://healthbridge-frontend-jj1l.onrender.com\n\n" +
+                "We look forward to serving you in the future!",
+                
+                appointment.getPatient().getFirstName(), 
+                appointment.getPatient().getLastName(),
+                appointment.getDoctor().getFirstName(), 
+                appointment.getDoctor().getLastName(),
+                appointment.getAppointmentDate().toString(),
+                appointment.getAppointmentTime().toString(),
+                appointment.getDoctor().getSpecialization(),
+                appointment.getConsultationFee()
+            );
+            
+            message.setText(emailBody);
+            
+            System.out.println("Email message prepared. Attempting to send...");
+            mailSender.send(message);
+            
+            System.out.println("✅ SUCCESS: Appointment rejection email sent successfully to: " + appointment.getPatientEmail());
+            System.out.println("=== APPOINTMENT REJECTION EMAIL DEBUG COMPLETE ===");
+            
+        } catch (Exception e) {
+            System.err.println("❌ ERROR: Failed to send appointment rejection email to: " + appointment.getPatientEmail());
+            System.err.println("Error Type: " + e.getClass().getSimpleName());
+            System.err.println("Error Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Email sending failed: " + e.getMessage(), e);
+        }
+    }
+    
     public void sendPasswordResetEmail(String email, String resetLink, String userName) {
         try {
             System.out.println("=== PASSWORD RESET EMAIL DEBUG ===");
