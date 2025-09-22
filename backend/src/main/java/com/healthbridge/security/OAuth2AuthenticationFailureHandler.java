@@ -19,7 +19,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                                       AuthenticationException exception) throws IOException, ServletException {
         
         // Build error redirect URL
-        String targetUrl = UriComponentsBuilder.fromUriString("https://healthbridge-frontend-jj1.onrender.com/auth/login")
+        String targetUrl = UriComponentsBuilder.fromUriString("https://healthbridge-frontend-jj1l.onrender.com/auth/login")
                 .queryParam("error", "oauth_failed")
                 .queryParam("message", "OAuth authentication failed")
                 .build().toUriString();

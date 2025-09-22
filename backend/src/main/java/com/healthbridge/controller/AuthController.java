@@ -133,4 +133,19 @@ public class AuthController {
             return ResponseEntity.badRequest().body("{\"error\": \"Test URL generation failed.\"}");
         }
     }
+    
+    // Test endpoint to check Google OAuth configuration
+    @GetMapping("/test-google-oauth")
+    public ResponseEntity<?> testGoogleOAuth() {
+        try {
+            System.out.println("=== GOOGLE OAUTH TEST ===");
+            System.out.println("Testing Google OAuth configuration");
+            
+            return ResponseEntity.ok().body("{\"message\": \"Google OAuth test endpoint working\", \"googleAuthUrl\": \"/oauth2/authorization/google\"}");
+        } catch (Exception e) {
+            System.err.println("❌ Google OAuth test failed: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("{\"error\": \"Google OAuth test failed.\"}");
+        }
+    }
 }
