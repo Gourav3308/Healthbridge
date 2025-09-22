@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
 import { ReviewService } from '../../../services/review.service';
+import { ImageService } from '../../../services/image.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 
@@ -308,7 +309,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private doctorService: DoctorService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -409,17 +411,8 @@ export class DashboardComponent implements OnInit {
       }
     }
     
-    // Check if user has a profile image URL
-    if (userData?.profileImageUrl) {
-      // If it's a relative URL, make it absolute
-      if (userData.profileImageUrl.startsWith('/')) {
-        return 'http://10.45.254.162:8081' + userData.profileImageUrl;
-      }
-      return userData.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    return 'https://via.placeholder.com/60x60/28a745/ffffff?text=Dr.' + (userData?.firstName?.charAt(0) || 'D');
+    // Use ImageService to get the full image URL
+    return this.imageService.getFullImageUrl(userData?.profileImageUrl);
   }
 
   formatDate(dateString: string): string {
