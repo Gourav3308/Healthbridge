@@ -26,10 +26,27 @@ public class PaymentService {
     public PaymentService(@Value("${razorpay.key.id}") String keyId, 
                          @Value("${razorpay.key.secret}") String keySecret) {
         try {
+            System.out.println("=== RAZORPAY SERVICE INITIALIZATION ===");
+            System.out.println("Key ID: " + keyId);
+            System.out.println("Key Secret: " + (keySecret != null ? "***" + keySecret.substring(keySecret.length() - 4) : "null"));
+            
+            if (keyId == null || keyId.trim().isEmpty() || keyId.equals("your-razorpay-key-id")) {
+                throw new RuntimeException("Razorpay Key ID is not properly configured");
+            }
+            if (keySecret == null || keySecret.trim().isEmpty() || keySecret.equals("your-razorpay-secret")) {
+                throw new RuntimeException("Razorpay Key Secret is not properly configured");
+            }
+            
             this.razorpayKeyId = keyId;
             this.razorpayKeySecret = keySecret;
             this.razorpayClient = new RazorpayClient(keyId, keySecret);
+            System.out.println("Razorpay client initialized successfully");
         } catch (RazorpayException e) {
+            System.err.println("Razorpay initialization error: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize Razorpay client", e);
+        } catch (Exception e) {
+            System.err.println("General initialization error: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to initialize Razorpay client", e);
         }

@@ -36,6 +36,9 @@ import com.healthbridge.service.PaymentService;
 import com.razorpay.RazorpayException;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/api/appointment-booking")
@@ -293,14 +296,26 @@ public class AppointmentBookingController {
     
     // DTOs for request bodies
     public static class PaymentOrderRequest {
+        @NotNull(message = "Doctor ID is required")
         private Long doctorId;
+        
+        @NotNull(message = "Slot ID is required")
         private Long slotId;
+        
+        @NotBlank(message = "Reason for visit is required")
         private String reasonForVisit;
+        
         private String symptoms;
         private String appointmentType = "CONSULTATION";
         private Boolean isFirstVisit = true;
+        
+        @NotBlank(message = "Patient phone is required")
         private String patientPhone;
+        
+        @NotBlank(message = "Patient email is required")
+        @Email(message = "Invalid email format")
         private String patientEmail;
+        
         private String emergencyContact;
         private String medicalHistory;
         
