@@ -26,6 +26,33 @@ app.use(express.static(distPath, {
   etag: false
 }));
 
+// Add specific handling for auth routes (including reset password)
+app.get('/auth/*', (req, res) => {
+  console.log('=== AUTH ROUTE ACCESSED ===');
+  console.log('Requested path:', req.path);
+  console.log('Full URL:', req.url);
+  console.log('Query params:', req.query);
+  
+  const indexPath = path.join(__dirname, 'dist', 'healthbridge-frontend', 'index.html');
+  console.log('Serving Angular app for auth route:', req.path);
+  console.log('Index path:', indexPath);
+  console.log('Index exists:', fs.existsSync(indexPath));
+  
+  if (fs.existsSync(indexPath)) {
+    // Set proper headers for SPA
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(indexPath);
+  } else {
+    console.error('Index.html not found for auth route');
+    const fallbackPath = path.join(__dirname, 'fallback.html');
+    if (fs.existsSync(fallbackPath)) {
+      res.sendFile(fallbackPath);
+    } else {
+      res.status(500).send('Application not built properly - index.html not found');
+    }
+  }
+});
+
 // Handle SPA routing - serve index.html for all routes that don't match static files
 app.get('*', (req, res) => {
   console.log('=== SERVER REQUEST RECEIVED ===');
@@ -34,14 +61,26 @@ app.get('*', (req, res) => {
   console.log('Request method:', req.method);
   console.log('Request headers:', req.headers);
   
-  // Check if the request is for a static file
-  if (req.path.includes('.') && !req.path.startsWith('/auth/') && !req.path.startsWith('/patient/') && !req.path.startsWith('/doctor/') && !req.path.startsWith('/admin/') && !req.path.startsWith('/info/')) {
+  // Check if the request is for a static file (has file extension and not a SPA route)
+  const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(req.path);
+  const isSPARoute = req.path.startsWith('/auth/') || 
+                     req.path.startsWith('/patient/') || 
+                     req.path.startsWith('/doctor/') || 
+                     req.path.startsWith('/admin/') || 
+                     req.path.startsWith('/info/') ||
+                     req.path === '/' ||
+                     req.path === '';
+  
+  if (hasFileExtension && !isSPARoute) {
     console.log('Static file request, returning 404');
     return res.status(404).send('File not found');
   }
   
   // For all other routes, serve the Angular app
   console.log('Serving Angular app for path:', req.path);
+  console.log('Is SPA route:', isSPARoute);
+  console.log('Has file extension:', hasFileExtension);
+  
   const indexPath = path.join(__dirname, 'dist', 'healthbridge-frontend', 'index.html');
   console.log('Index file path:', indexPath);
   console.log('Index file exists:', fs.existsSync(indexPath));
