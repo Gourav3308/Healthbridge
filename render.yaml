@@ -40,8 +40,9 @@ services:
     name: healthbridge-frontend
     env: node
     rootDir: frontend
-    buildCommand: npm install && npm run build && ls -la dist/ && ls -la dist/healthbridge-frontend/
-    startCommand: npm run serve
+    buildCommand: npm install && npm run build && ls -la dist/ && ls -la dist/healthbridge-frontend/ && node build-test.js
+    startCommand: node start-debug.js
+    plan: starter
     headers:
       - path: /*
         name: X-Frame-Options
@@ -64,3 +65,7 @@ services:
           type: web
           name: healthbridge-backend
           property: host
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"

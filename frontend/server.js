@@ -117,8 +117,38 @@ app.get('/test.html', (req, res) => {
 });
 
 const port = process.env.PORT || 4200;
-app.listen(port, () => {
+
+// Add error handling for server startup
+const server = app.listen(port, (err) => {
+  if (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
   console.log(`HealthBridge Frontend Server running on port ${port}`);
   console.log(`Serving SPA with fallback routing`);
   console.log(`Test route available at: http://localhost:${port}/test`);
+  console.log(`Health check available at: http://localhost:${port}/health`);
+});
+
+// Handle server errors
+server.on('error', (err) => {
+  console.error('Server error:', err);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
