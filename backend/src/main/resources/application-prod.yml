@@ -8,13 +8,13 @@ spring:
     mode: console
   
   datasource:
-    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthbridge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-    username: ${DB_USERNAME:root}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/healthbridge}
+    username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:password}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
     hikari:
-      jdbc-url: ${DATABASE_URL:jdbc:mysql://localhost:3306/healthbridge?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-      username: ${DB_USERNAME:root}
+      jdbc-url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/healthbridge}
+      username: ${DB_USERNAME:postgres}
       password: ${DB_PASSWORD:password}
       maximum-pool-size: 5
       minimum-idle: 1
@@ -30,10 +30,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         connection:
           provider_disables_autocommit: true
@@ -90,8 +90,8 @@ file:
     max-size: 10485760 # 10MB
 
 # CORS Configuration
-cors:
-  allowed-origins: ${CORS_ORIGINS:http://localhost:4200,https://healthbridge-frontend-jj1.onrender.com}
+ cors:
+   allowed-origins: ${CORS_ORIGINS:http://localhost:4200,https://healthbridge-frontend-jj1l.onrender.com}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true
