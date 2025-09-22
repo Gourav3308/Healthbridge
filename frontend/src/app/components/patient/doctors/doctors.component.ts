@@ -193,12 +193,17 @@ import { HeaderComponent } from '../../shared/header/header.component';
     .doctor-avatar {
       width: 60px;
       height: 60px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 50%;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+    }
+    
+    .doctor-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     
     .stars i {

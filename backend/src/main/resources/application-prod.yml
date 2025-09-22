@@ -28,6 +28,12 @@ cors:
   allowed-headers: "*"
   allow-credentials: true
 
+# Razorpay Configuration
+razorpay:
+  key:
+    id: ${RAZORPAY_KEY_ID:rzp_test_1234567890}
+    secret: ${RAZORPAY_SECRET:your-razorpay-secret}
+
 logging:
   level:
     com.healthbridge: INFO
