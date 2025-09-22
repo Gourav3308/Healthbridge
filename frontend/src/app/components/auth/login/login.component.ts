@@ -340,6 +340,11 @@ export class LoginComponent implements OnInit {
       this.returnUrl = params['returnUrl'] || '';
       this.bookingAction = params['action'] === 'book';
       this.doctorId = +params['doctorId'] || 0;
+      
+      // Handle OAuth error parameters
+      if (params['error'] === 'oauth_failed') {
+        this.errorMessage = 'Google login failed. Please try again or use email/password login.';
+      }
     });
   }
 

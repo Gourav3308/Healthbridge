@@ -35,8 +35,16 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             return result;
         } catch (Exception ex) {
             System.err.println("❌ OAuth2 user processing failed: " + ex.getMessage());
+            System.err.println("Exception type: " + ex.getClass().getSimpleName());
             ex.printStackTrace();
-            throw new OAuth2AuthenticationException("OAuth2 authentication failed: " + ex.getMessage());
+            
+            // Add more specific error handling
+            String errorMessage = "OAuth2 authentication failed: " + ex.getMessage();
+            if (ex.getMessage() != null && ex.getMessage().contains("password")) {
+                errorMessage = "OAuth2 authentication failed: Password validation error";
+            }
+            
+            throw new OAuth2AuthenticationException(errorMessage);
         }
     }
     
@@ -51,6 +59,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         if ("google".equals(registrationId)) {
             userInfo = new GoogleOAuth2UserInfo(attributes);
             System.out.println("Google user info created - Email: " + userInfo.getEmail());
+            System.out.println("Google user info - Name: " + userInfo.getFirstName() + " " + userInfo.getLastName());
+            System.out.println("Google user info - ID: " + userInfo.getId());
+            System.out.println("Google user info - Image URL: " + userInfo.getImageUrl());
         } else {
             System.err.println("❌ Unsupported OAuth2 provider: " + registrationId);
             throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + registrationId);
@@ -119,6 +130,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         patient.setAuthProvider("GOOGLE");
         patient.setProfileImageUrl(userInfo.getImageUrl());
         patient.setIsActive(true);
+        // Set a dummy password for OAuth users (they won't use it)
+        patient.setPassword("OAUTH_USER_NO_PASSWORD");
         
         return patientRepository.save(patient);
     }
