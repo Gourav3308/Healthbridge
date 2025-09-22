@@ -120,8 +120,15 @@ public class AppointmentBookingController {
     @PostMapping("/create-payment-order")
     public ResponseEntity<?> createPaymentOrder(@RequestBody @Valid PaymentOrderRequest request) {
         try {
+            System.out.println("=== CREATE PAYMENT ORDER DEBUG ===");
+            System.out.println("Received request: " + request);
+            System.out.println("Doctor ID: " + request.getDoctorId());
+            System.out.println("Slot ID: " + request.getSlotId());
+            System.out.println("Reason: " + request.getReasonForVisit());
+            
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
+            System.out.println("Current user email: " + email);
             
             Patient patient = patientRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));

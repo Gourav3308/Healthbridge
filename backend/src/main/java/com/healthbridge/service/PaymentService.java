@@ -37,12 +37,21 @@ public class PaymentService {
     
     public Map<String, Object> createOrder(Double amount, String currency, String receipt) throws RazorpayException {
         try {
+            System.out.println("=== RAZORPAY CREATE ORDER DEBUG ===");
+            System.out.println("Amount: " + amount);
+            System.out.println("Currency: " + currency);
+            System.out.println("Receipt: " + receipt);
+            System.out.println("Razorpay Key ID: " + razorpayKeyId);
+            System.out.println("Razorpay Secret: " + (razorpayKeySecret != null ? "***" + razorpayKeySecret.substring(razorpayKeySecret.length() - 4) : "null"));
+            
             JSONObject orderRequest = new JSONObject();
             orderRequest.put("amount", Math.round(amount * 100)); // Convert to paise
             orderRequest.put("currency", currency);
             orderRequest.put("receipt", receipt);
             
+            System.out.println("Order request: " + orderRequest.toString());
             Order order = razorpayClient.orders.create(orderRequest);
+            System.out.println("Order created successfully: " + order.get("id"));
             
             Map<String, Object> response = new HashMap<>();
             response.put("orderId", order.get("id"));

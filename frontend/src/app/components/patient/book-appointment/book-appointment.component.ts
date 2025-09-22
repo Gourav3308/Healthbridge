@@ -1023,6 +1023,10 @@ export class BookAppointmentComponent implements OnInit {
     };
 
     console.log('Creating payment order:', bookingRequest);
+    console.log('Selected doctor:', this.selectedDoctor);
+    console.log('Selected slot:', this.selectedSlot);
+    console.log('Form valid:', this.appointmentForm.valid);
+    console.log('Form errors:', this.appointmentForm.errors);
 
     this.appointmentService.createPaymentOrder(bookingRequest).subscribe({
       next: (response) => {
@@ -1032,6 +1036,8 @@ export class BookAppointmentComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error creating payment order:', error);
+        console.error('Error details:', error.error);
+        console.error('Error status:', error.status);
         this.isBooking = false;
         
         let errorMessage = 'Failed to create payment order. Please try again.';
