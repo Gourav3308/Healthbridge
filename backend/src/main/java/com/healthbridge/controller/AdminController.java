@@ -190,4 +190,15 @@ public class AdminController {
         long count = adminService.getTotalDoctorsCount();
         return ResponseEntity.ok(count);
     }
+    
+    // Generate slots for all approved doctors
+    @PostMapping("/generate-slots")
+    public ResponseEntity<String> generateSlotsForAllDoctors() {
+        try {
+            adminService.generateSlotsForAllApprovedDoctors();
+            return ResponseEntity.ok("Slots generated successfully for all approved doctors");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to generate slots: " + e.getMessage());
+        }
+    }
 }

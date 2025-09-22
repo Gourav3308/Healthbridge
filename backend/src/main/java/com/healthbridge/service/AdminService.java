@@ -115,18 +115,15 @@ public class AdminService {
         }
         
         // Generate default schedule and appointment slots for the newly approved doctor
-        // Temporarily disabled for testing
-        /*
         try {
             appointmentSlotService.createDefaultScheduleForDoctor(savedDoctor.getId());
-            System.out.println("Default schedule and slots created for doctor: " + savedDoctor.getEmail());
+            System.out.println("✅ Default schedule and slots created for doctor: " + savedDoctor.getEmail());
         } catch (Exception e) {
-            System.err.println("Failed to create default schedule for doctor: " + savedDoctor.getEmail());
+            System.err.println("❌ Failed to create default schedule for doctor: " + savedDoctor.getEmail());
             System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
             // Don't throw exception here - we don't want slot generation failure to break the approval process
         }
-        */
-        System.out.println("Skipping schedule creation for testing purposes");
         
         return savedDoctor;
     }
@@ -337,5 +334,29 @@ public class AdminService {
     
     public long getTotalDoctorsCount() {
         return doctorRepository.count();
+    }
+    
+    // Generate slots for all approved doctors who don't have slots
+    public void generateSlotsForAllApprovedDoctors() {
+        List<Doctor> approvedDoctors = doctorRepository.findByIsApproved(true);
+        System.out.println("Found " + approvedDoctors.size() + " approved doctors");
+        
+        for (Doctor doctor : approvedDoctors) {
+            try {
+                // Check if doctor already has slots
+                long existingSlots = appointmentSlotRepository.countByDoctorIdAndIsActive(doctor.getId(), true);
+                if (existingSlots == 0) {
+                    System.out.println("Generating slots for doctor: " + doctor.getEmail());
+                    appointmentSlotService.createDefaultScheduleForDoctor(doctor.getId());
+                    System.out.println("✅ Slots created for doctor: " + doctor.getEmail());
+                } else {
+                    System.out.println("Doctor " + doctor.getEmail() + " already has " + existingSlots + " slots");
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Failed to create slots for doctor: " + doctor.getEmail());
+                System.err.println("Error: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 } 

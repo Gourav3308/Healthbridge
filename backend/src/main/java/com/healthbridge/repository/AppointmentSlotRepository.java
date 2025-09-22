@@ -83,4 +83,7 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
     
     // Delete all slots for a specific doctor
     void deleteByDoctorId(Long doctorId);
+    
+    // Count slots by doctor ID and active status
+    long countByDoctorIdAndIsActive(Long doctorId, Boolean isActive);
 }

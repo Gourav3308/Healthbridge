@@ -3,8 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
-import { ReviewService } from '../../../services/review.service';
 import { ImageService } from '../../../services/image.service';
+import { ReviewService } from '../../../services/review.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 
