@@ -22,7 +22,7 @@ import com.healthbridge.service.AdminService;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"http://localhost:4200", "https://healthbridge-frontend-jj1.onrender.com"})
+@CrossOrigin(origins = {"http://localhost:4200", "https://healthbridge-frontend-jj1l.onrender.com"})
 // @PreAuthorize("hasRole('ADMIN')") // Temporarily disabled for testing
 public class AdminController {
     
@@ -54,9 +54,14 @@ public class AdminController {
     @PostMapping("/doctors/{id}/approve")
     public ResponseEntity<Doctor> approveDoctor(@PathVariable Long id) {
         try {
+            System.out.println("=== ADMIN CONTROLLER DEBUG ===");
+            System.out.println("Received approval request for doctor ID: " + id);
             Doctor approvedDoctor = adminService.approveDoctor(id);
+            System.out.println("Doctor approval successful: " + approvedDoctor.getEmail());
             return ResponseEntity.ok(approvedDoctor);
         } catch (Exception e) {
+            System.err.println("Doctor approval failed for ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
