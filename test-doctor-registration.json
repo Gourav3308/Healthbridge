@@ -1,0 +1,18 @@
+{
+  "email": "newtestdoctor@example.com",
+  "password": "doctor123",
+  "firstName": "Test",
+  "lastName": "Doctor",
+  "phone": "9876543210",
+  "licenseNumber": "DOC789012",
+  "specialization": "Cardiology",
+  "qualification": "MBBS, MD Cardiology",
+  "experienceYears": 5,
+  "consultationFee": 500,
+  "about": "Experienced cardiologist with 5 years of practice",
+  "hospitalAffiliation": "Test Hospital",
+  "address": "123 Medical Street",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "pincode": "400001"
+}

@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Appointment, AppointmentBookingRequest, AppointmentRequest, PaymentOrderResponse, PaymentVerificationRequest } from '../models/appointment.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppointmentService {
-  private apiUrl = 'http://10.45.254.162:8081/api';
-  private bookingApiUrl = 'http://10.45.254.162:8081/api/appointment-booking';
+  private apiUrl = environment.apiUrl;
+  private bookingApiUrl = environment.apiUrl + '/appointment-booking';
 
   constructor(private http: HttpClient) {}
 

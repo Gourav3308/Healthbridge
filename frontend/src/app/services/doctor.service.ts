@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Appointment } from '../models/appointment.model';
 import { Doctor, DoctorUpdateRequest, Specialization } from '../models/doctor.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DoctorService {
-  private apiUrl = 'http://10.45.254.162:8081/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
