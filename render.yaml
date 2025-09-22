@@ -43,7 +43,7 @@ services:
     env: node
     rootDir: frontend
     buildCommand: npm install && npm run build && ls -la dist/ && ls -la dist/healthbridge-frontend/ && node build-test.js
-    startCommand: node start-debug.js
+    startCommand: node server.js
     plan: starter
     headers:
       - path: /*

@@ -32,19 +32,36 @@ app.get('/auth/*', (req, res) => {
   console.log('Requested path:', req.path);
   console.log('Full URL:', req.url);
   console.log('Query params:', req.query);
+  console.log('Request headers:', req.headers);
   
   const indexPath = path.join(__dirname, 'dist', 'healthbridge-frontend', 'index.html');
   console.log('Serving Angular app for auth route:', req.path);
   console.log('Index path:', indexPath);
   console.log('Index exists:', fs.existsSync(indexPath));
   
+  if (!fs.existsSync(indexPath)) {
+    console.error('❌ Index.html not found at:', indexPath);
+    console.log('Dist directory contents:', fs.existsSync(distPath) ? fs.readdirSync(distPath) : 'dist does not exist');
+    return res.status(500).json({
+      error: 'Frontend not built properly',
+      message: 'index.html not found',
+      path: indexPath,
+      distExists: fs.existsSync(distPath),
+      distContents: fs.existsSync(distPath) ? fs.readdirSync(distPath) : []
+    });
+  }
+  
   // Always serve the Angular app for auth routes
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error serving index.html for auth route:', err);
-      res.status(500).send('Error loading application');
+      res.status(500).json({
+        error: 'Error loading application',
+        message: err.message,
+        path: indexPath
+      });
     } else {
-      console.log('Successfully served Angular app for auth route:', req.path);
+      console.log('✅ Successfully served Angular app for auth route:', req.path);
     }
   });
 });
