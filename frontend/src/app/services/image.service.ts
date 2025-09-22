@@ -21,6 +21,7 @@ export class ImageService {
     // If it's a relative URL, prepend the backend URL
     if (imageUrl.startsWith('/')) {
       const backendUrl = environment.apiUrl.replace('/api', '');
+      console.log('ImageService: Building URL for', imageUrl, '->', backendUrl + imageUrl);
       return backendUrl + imageUrl;
     }
     
@@ -29,6 +30,6 @@ export class ImageService {
   }
 
   getDefaultAvatar(): string {
-    return 'assets/images/default-avatar.png';
+    return 'assets/images/default-avatar.svg';
   }
 }
