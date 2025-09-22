@@ -25,9 +25,9 @@ services:
       - key: MAIL_PASSWORD
         value: bisvrfctijbvfnbu
       - key: GOOGLE_CLIENT_ID
-        value: your-google-client-id
+        value: 468629260262-6ua09pru34mlsjerlvuhjocvn09mrlje.apps.googleusercontent.com
       - key: GOOGLE_CLIENT_SECRET
-        value: your-google-client-secret
+        value: YOUR_CLIENT_SECRET_HERE
       - key: RAZORPAY_KEY_ID
         value: rzp_test_ePOPRenR20mzsg
       - key: RAZORPAY_SECRET
