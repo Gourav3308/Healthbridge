@@ -189,88 +189,38 @@ public class AdminService {
     }
     
     public void deleteDoctor(Long doctorId) {
-        System.out.println("DEBUG: Starting deleteDoctor for ID: " + doctorId);
+        System.out.println("DEBUG: Starting optimized deleteDoctor for ID: " + doctorId);
         Doctor doctor = doctorRepository.findById(doctorId)
             .orElseThrow(() -> new RuntimeException("Doctor not found"));
         
         System.out.println("DEBUG: Found doctor: " + doctor.getFirstName() + " " + doctor.getLastName());
         
-        // First, handle all active reviews for this doctor to avoid foreign key constraint
         try {
-            List<com.healthbridge.entity.Review> activeReviews = reviewRepository.findByDoctorIdAndIsActiveOrderByCreatedAtDesc(doctorId, true);
-            System.out.println("DEBUG: Found " + activeReviews.size() + " active reviews to delete");
-            for (com.healthbridge.entity.Review review : activeReviews) {
-                review.setIsActive(false);
-                reviewRepository.save(review);
-            }
+            // Use batch operations for better performance
             
-            // Also handle inactive reviews to be safe
-            List<com.healthbridge.entity.Review> inactiveReviews = reviewRepository.findByDoctorIdAndIsActiveOrderByCreatedAtDesc(doctorId, false);
-            System.out.println("DEBUG: Found " + inactiveReviews.size() + " inactive reviews to delete");
-            for (com.healthbridge.entity.Review review : inactiveReviews) {
-                reviewRepository.delete(review);
-            }
-        } catch (Exception e) {
-            System.err.println("DEBUG: Error handling Review entities: " + e.getMessage());
-        }
-        
-        // Handle DoctorReviews (different entity) for this doctor
-        try {
-            List<DoctorReview> doctorReviewsList = doctorReviewRepository.findByDoctorId(doctorId);
-            System.out.println("DEBUG: Found " + doctorReviewsList.size() + " doctor reviews to delete");
-            for (DoctorReview doctorReview : doctorReviewsList) {
-                doctorReviewRepository.delete(doctorReview);
-            }
-        } catch (Exception e) {
-            System.err.println("DEBUG: Error handling DoctorReview entities: " + e.getMessage());
-        }
-        
-        // Cancel all scheduled and confirmed appointments for this doctor to avoid foreign key constraint
-        try {
-            List<Appointment> scheduledAppointments = appointmentRepository.findByDoctorIdAndStatus(doctorId, AppointmentStatus.SCHEDULED);
-            List<Appointment> confirmedAppointments = appointmentRepository.findByDoctorIdAndStatus(doctorId, AppointmentStatus.CONFIRMED);
+            // 1. Batch update appointments to CANCELLED status
+            int cancelledAppointments = appointmentRepository.cancelAppointmentsByDoctorId(doctorId);
+            System.out.println("DEBUG: Cancelled " + cancelledAppointments + " appointments");
             
-            System.out.println("DEBUG: Found " + scheduledAppointments.size() + " scheduled appointments to cancel");
-            System.out.println("DEBUG: Found " + confirmedAppointments.size() + " confirmed appointments to cancel");
-            
-            for (Appointment appointment : scheduledAppointments) {
-                appointment.setStatus(AppointmentStatus.CANCELLED);
-                appointmentRepository.save(appointment);
-                System.out.println("DEBUG: Cancelled appointment ID: " + appointment.getId());
-            }
-            for (Appointment appointment : confirmedAppointments) {
-                appointment.setStatus(AppointmentStatus.CANCELLED);
-                appointmentRepository.save(appointment);
-                System.out.println("DEBUG: Cancelled appointment ID: " + appointment.getId());
-            }
-        } catch (Exception e) {
-            System.err.println("DEBUG: Error cancelling appointments: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        // Delete all appointment slots for this doctor to avoid foreign key constraint
-        try {
+            // 2. Batch delete appointment slots
             appointmentSlotRepository.deleteByDoctorId(doctorId);
-            System.out.println("Deleted appointment slots for doctor ID: " + doctorId);
-        } catch (Exception e) {
-            System.err.println("Error deleting appointment slots for doctor " + doctorId + ": " + e.getMessage());
-        }
-        
-        // Delete all doctor schedules for this doctor to avoid foreign key constraint
-        try {
+            System.out.println("DEBUG: Deleted appointment slots for doctor ID: " + doctorId);
+            
+            // 3. Batch delete doctor schedules  
             doctorScheduleRepository.deleteByDoctorId(doctorId);
-            System.out.println("Deleted doctor schedules for doctor ID: " + doctorId);
-        } catch (Exception e) {
-            System.err.println("Error deleting doctor schedules for doctor " + doctorId + ": " + e.getMessage());
-        }
-        
-        // Now delete the doctor
-        try {
-            System.out.println("DEBUG: About to delete doctor");
+            System.out.println("DEBUG: Deleted doctor schedules for doctor ID: " + doctorId);
+            
+            // 4. Batch delete all reviews (both Review and DoctorReview entities)
+            reviewRepository.deleteByDoctorId(doctorId);
+            doctorReviewRepository.deleteByDoctorId(doctorId);
+            System.out.println("DEBUG: Deleted all reviews for doctor ID: " + doctorId);
+            
+            // 5. Finally delete the doctor
             doctorRepository.delete(doctor);
-            System.out.println("DEBUG: Doctor deleted successfully");
+            System.out.println("DEBUG: Doctor deleted successfully using optimized process");
+            
         } catch (Exception e) {
-            System.err.println("DEBUG: Error deleting doctor: " + e.getMessage());
+            System.err.println("DEBUG: Error in optimized deleteDoctor: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to delete doctor: " + e.getMessage());
         }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -77,4 +78,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Find all appointments by doctor ordered by date and time (most recent first)
     @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId ORDER BY a.appointmentDate DESC, a.appointmentTime DESC")
     List<Appointment> findByDoctorIdOrderByAppointmentDateDescAppointmentTimeDesc(@Param("doctorId") Long doctorId);
+    
+    // Batch update appointments to CANCELLED status for a doctor
+    @Modifying
+    @Query("UPDATE Appointment a SET a.status = 'CANCELLED' WHERE a.doctor.id = :doctorId AND a.status IN ('SCHEDULED', 'CONFIRMED')")
+    int cancelAppointmentsByDoctorId(@Param("doctorId") Long doctorId);
 }

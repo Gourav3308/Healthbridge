@@ -40,4 +40,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // Find recent reviews for a doctor (limit 10)
     @Query("SELECT r FROM Review r WHERE r.doctor.id = :doctorId AND r.isActive = true ORDER BY r.createdAt DESC")
     List<Review> findRecentReviewsByDoctorId(@Param("doctorId") Long doctorId);
+    
+    // Batch delete all reviews for a doctor
+    void deleteByDoctorId(Long doctorId);
 }

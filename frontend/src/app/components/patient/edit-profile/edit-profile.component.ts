@@ -521,6 +521,9 @@ export class EditProfileComponent implements OnInit {
           if (currentUser && response.imageUrl) {
             currentUser.profileImageUrl = response.imageUrl;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Update the AuthService currentUser subject to trigger reactive updates
+            this.authService.updateCurrentUser(currentUser);
           }
           
           // Clear selected image and preview

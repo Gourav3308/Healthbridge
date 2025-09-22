@@ -192,4 +192,9 @@ export class AuthService {
       newPassword 
     });
   }
+
+  // Method to update current user data and trigger reactive updates
+  updateCurrentUser(userData: any): void {
+    this.currentUserSubject.next(userData);
+  }
 }

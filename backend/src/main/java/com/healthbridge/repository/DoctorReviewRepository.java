@@ -40,4 +40,7 @@ public interface DoctorReviewRepository extends JpaRepository<DoctorReview, Long
     
     @Query("SELECT dr FROM DoctorReview dr WHERE dr.doctor.id = :doctorId AND dr.rating = :rating")
     List<DoctorReview> findByDoctorIdAndRating(@Param("doctorId") Long doctorId, @Param("rating") Integer rating);
+    
+    // Batch delete all doctor reviews for a doctor
+    void deleteByDoctorId(Long doctorId);
 }
