@@ -31,8 +31,8 @@ cors:
 # Razorpay Configuration
 razorpay:
   key:
-    id: ${RAZORPAY_KEY_ID:rzp_test_1234567890}
-    secret: ${RAZORPAY_SECRET:your-razorpay-secret}
+    id: ${RAZORPAY_KEY_ID:rzp_test_ePOPRenR20mzsg}
+    secret: ${RAZORPAY_SECRET:WLGtxuC251XBSyZiEwyIR3gA}
 
 logging:
   level:

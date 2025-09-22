@@ -29,9 +29,9 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         value: your-google-client-secret
       - key: RAZORPAY_KEY_ID
-        value: your-razorpay-key-id
+        value: rzp_test_ePOPRenR20mzsg
       - key: RAZORPAY_SECRET
-        value: your-razorpay-secret
+        value: WLGtxuC251XBSyZiEwyIR3gA
       - key: CORS_ORIGINS
         value: "https://healthbridge-frontend-jj1l.onrender.com,http://localhost:4200"
 
