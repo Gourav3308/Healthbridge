@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ImageService } from '../../../services/image.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 
@@ -192,7 +193,7 @@ export class DashboardComponent implements OnInit {
   doctorsConsulted = 0;
   recentActivities: any[] = [];
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private imageService: ImageService) {}
 
   ngOnInit(): void {
     // Subscribe to currentUser$ to get updates when user data changes
@@ -239,17 +240,8 @@ export class DashboardComponent implements OnInit {
       }
     }
     
-    // Check if user has a profile image URL
-    if (userData?.profileImageUrl) {
-      // If it's a relative URL, make it absolute
-      if (userData.profileImageUrl.startsWith('/')) {
-        return 'http://10.45.254.162:8081' + userData.profileImageUrl;
-      }
-      return userData.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    return 'https://via.placeholder.com/60x60/667eea/ffffff?text=' + (userData?.firstName?.charAt(0) || 'U');
+    return this.imageService.getFullImageUrl(userData?.profileImageUrl) || 
+           'https://via.placeholder.com/60x60/667eea/ffffff?text=' + (userData?.firstName?.charAt(0) || 'U');
   }
 
   logout(): void {

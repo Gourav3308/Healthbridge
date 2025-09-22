@@ -505,12 +505,12 @@ export class DashboardComponent implements OnInit {
 
   managePatients(): void {
     // Navigate to patient management page
-    this.router.navigate(['/admin/patients']);
+    this.router.navigate(['/admin/manage-patients']);
   }
 
   manageDoctors(): void {
     // Navigate to doctor management page
-    this.router.navigate(['/admin/doctors']);
+    this.router.navigate(['/admin/manage-doctors']);
   }
 
   viewAnalytics(): void {
