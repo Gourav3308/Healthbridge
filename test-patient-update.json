@@ -1,0 +1,14 @@
+{
+  "firstName": "Updated",
+  "lastName": "Patient",
+  "phone": "9876543210",
+  "dateOfBirth": "1990-01-01",
+  "gender": "MALE",
+  "address": "123 Updated Street",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "pincode": "400001",
+  "emergencyContact": "9876543211",
+  "bloodGroup": "A+",
+  "medicalHistory": "No known allergies"
+}
