@@ -43,6 +43,12 @@ public class AdminController {
     @Autowired
     private AppointmentSlotService appointmentSlotService;
     
+    // Health check endpoint
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> healthCheck() {
+        return ResponseEntity.ok(Map.of("status", "UP", "service", "healthbridge-backend"));
+    }
+    
     @GetMapping("/doctors/pending")
     public ResponseEntity<List<Doctor>> getPendingDoctors() {
         List<Doctor> pendingDoctors = adminService.getPendingDoctors();
