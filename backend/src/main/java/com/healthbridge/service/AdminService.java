@@ -83,7 +83,7 @@ public class AdminService {
         
         // Get current admin user (handle case where no authentication context exists)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String adminEmail = null;
+        final String adminEmail;
         
         if (authentication != null && authentication.isAuthenticated() && 
             !authentication.getName().equals("anonymousUser")) {
