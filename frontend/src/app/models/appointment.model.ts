@@ -118,6 +118,16 @@ export interface PaymentVerificationRequest {
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;
+  slotId?: number;
+  doctorId?: number;
+  reasonForVisit?: string;
+  symptoms?: string;
+  appointmentType?: string;
+  isFirstVisit?: boolean;
+  patientPhone?: string;
+  patientEmail?: string;
+  emergencyContact?: string;
+  medicalHistory?: string;
 }
 
 export type AppointmentStatus = 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';

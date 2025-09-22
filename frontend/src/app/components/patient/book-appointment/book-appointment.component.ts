@@ -1087,7 +1087,17 @@ export class BookAppointmentComponent implements OnInit {
     const verificationRequest: PaymentVerificationRequest = {
       razorpayOrderId: paymentData.paymentOrder.orderId,
       razorpayPaymentId: razorpayResponse.razorpay_payment_id,
-      razorpaySignature: razorpayResponse.razorpay_signature
+      razorpaySignature: razorpayResponse.razorpay_signature,
+      slotId: this.selectedSlot?.id,
+      doctorId: this.selectedDoctor?.id,
+      reasonForVisit: this.appointmentForm.get('reasonForVisit')?.value,
+      symptoms: this.appointmentForm.get('symptoms')?.value,
+      appointmentType: this.appointmentForm.get('appointmentType')?.value,
+      isFirstVisit: this.appointmentForm.get('isFirstVisit')?.value,
+      patientPhone: this.appointmentForm.get('patientPhone')?.value,
+      patientEmail: this.appointmentForm.get('patientEmail')?.value,
+      emergencyContact: this.appointmentForm.get('emergencyContact')?.value,
+      medicalHistory: this.appointmentForm.get('medicalHistory')?.value
     };
 
     console.log('Verifying payment:', verificationRequest);

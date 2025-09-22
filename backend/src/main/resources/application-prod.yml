@@ -17,6 +17,17 @@ spring:
   sql:
     init:
       mode: always
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:healthbridge13012002@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
   secret: ${JWT_SECRET:healthbridge-secret-key-2023-very-long-secret-key-for-jwt-token-generation}
@@ -33,6 +44,7 @@ razorpay:
   key:
     id: ${RAZORPAY_KEY_ID:rzp_test_ePOPRenR20mzsg}
     secret: ${RAZORPAY_SECRET:WLGtxuC251XBSyZiEwyIR3gA}
+
 
 logging:
   level:

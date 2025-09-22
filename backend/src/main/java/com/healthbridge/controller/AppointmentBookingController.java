@@ -63,8 +63,9 @@ public class AppointmentBookingController {
     @Autowired
     private PaymentService paymentService;
     
-    @Autowired
-    private EmailService emailService;
+    // EmailService will be used in future email notifications
+    // @Autowired
+    // private EmailService emailService;
     
     // Get available slots for a doctor on a specific date
     @GetMapping("/doctor/{doctorId}/slots")
@@ -143,49 +144,52 @@ public class AppointmentBookingController {
             AppointmentSlot slot = slotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new RuntimeException("Appointment slot not found"));
             
+            System.out.println("=== SLOT VALIDATION DEBUG ===");
+            System.out.println("Slot ID: " + slot.getId());
+            System.out.println("Slot Status: " + slot.getStatus());
+            System.out.println("Booked Count: " + slot.getBookedCount());
+            System.out.println("Max Capacity: " + slot.getMaxCapacity());
+            System.out.println("Is Available: " + slot.isAvailable());
+            System.out.println("Can Book: " + slot.canBook());
+            
             if (!slot.isAvailable()) {
+                System.out.println("❌ Slot is not available");
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Selected time slot is no longer available"));
             }
             
-            // Create temporary appointment record
-            Appointment appointment = new Appointment();
-            appointment.setPatient(patient);
-            appointment.setDoctor(doctor);
-            appointment.setAppointmentDate(slot.getSlotDate());
-            appointment.setAppointmentTime(slot.getSlotTime());
-            appointment.setConsultationFee(doctor.getConsultationFee().doubleValue());
-            appointment.setReasonForVisit(request.getReasonForVisit());
-            appointment.setSymptoms(request.getSymptoms());
-            appointment.setAppointmentType(request.getAppointmentType());
-            appointment.setIsFirstVisit(request.getIsFirstVisit());
-            appointment.setPatientPhone(request.getPatientPhone());
-            appointment.setPatientEmail(request.getPatientEmail() != null ? request.getPatientEmail() : patient.getEmail());
-            appointment.setEmergencyContact(request.getEmergencyContact());
-            appointment.setMedicalHistory(request.getMedicalHistory());
-            appointment.setStatus(AppointmentStatus.SCHEDULED);
-            appointment.setPaymentStatus(Appointment.PaymentStatus.PENDING);
+            // Double-check slot availability using repository method
+            boolean slotAvailable = slotRepository.isSlotAvailable(request.getSlotId());
+            System.out.println("Repository check - Slot available: " + slotAvailable);
             
-            Appointment savedAppointment = appointmentRepository.save(appointment);
+            if (!slotAvailable) {
+                System.out.println("❌ Slot availability check failed");
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Selected time slot is no longer available"));
+            }
             
-            // Create Razorpay order
-            Map<String, Object> paymentOrder = paymentService.createAppointmentOrder(
-                savedAppointment.getId(),
+            // Create Razorpay order without creating appointment first
+            // Generate a unique receipt ID for this booking attempt
+            String receiptId = "appt_" + System.currentTimeMillis() + "_" + request.getSlotId();
+            
+            Map<String, Object> paymentOrder = paymentService.createOrder(
                 doctor.getConsultationFee().doubleValue(),
-                patient.getEmail()
+                "INR",
+                receiptId
             );
             
-            // Store order ID in appointment
-            savedAppointment.setRazorpayOrderId((String) paymentOrder.get("orderId"));
-            appointmentRepository.save(savedAppointment);
+            // Store booking details in session or temporary storage for payment verification
+            // For now, we'll return the payment order and handle appointment creation in verifyPayment
             
             Map<String, Object> response = new HashMap<>();
-            response.put("appointmentId", savedAppointment.getId());
+            response.put("slotId", request.getSlotId());
+            response.put("doctorId", request.getDoctorId());
             response.put("paymentOrder", paymentOrder);
             response.put("doctorName", "Dr. " + doctor.getFirstName() + " " + doctor.getLastName());
             response.put("appointmentDate", slot.getSlotDate());
             response.put("appointmentTime", slot.getSlotTime());
             response.put("consultationFee", doctor.getConsultationFee());
+            response.put("receiptId", receiptId);
             
             return ResponseEntity.ok(response);
             
@@ -202,6 +206,11 @@ public class AppointmentBookingController {
     @PostMapping("/verify-payment")
     public ResponseEntity<?> verifyPayment(@RequestBody @Valid PaymentVerificationRequest request) {
         try {
+            System.out.println("=== PAYMENT VERIFICATION DEBUG ===");
+            System.out.println("Order ID: " + request.getRazorpayOrderId());
+            System.out.println("Payment ID: " + request.getRazorpayPaymentId());
+            System.out.println("Signature: " + request.getRazorpaySignature());
+            
             // Verify payment signature
             boolean isValidPayment = paymentService.verifyPayment(
                 request.getRazorpayOrderId(),
@@ -209,45 +218,71 @@ public class AppointmentBookingController {
                 request.getRazorpaySignature()
             );
             
+            System.out.println("Payment verification result: " + isValidPayment);
+            
             if (!isValidPayment) {
+                System.out.println("❌ Payment verification failed");
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid payment signature"));
             }
             
-            // Find appointment
-            Appointment appointment = appointmentRepository.findByRazorpayOrderId(request.getRazorpayOrderId())
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+            // Get current user
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            Patient patient = patientRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
             
-            // Update appointment with payment details
+            // Get slot and doctor details from the request
+            AppointmentSlot slot = slotRepository.findById(request.getSlotId())
+                .orElseThrow(() -> new RuntimeException("Appointment slot not found"));
+            
+            Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+            
+            // Double-check slot availability before creating appointment
+            if (!slot.isAvailable()) {
+                System.out.println("❌ Slot no longer available during payment verification");
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Selected time slot is no longer available"));
+            }
+            
+            // Create appointment only after successful payment verification
+            Appointment appointment = new Appointment();
+            appointment.setPatient(patient);
+            appointment.setDoctor(doctor);
+            appointment.setAppointmentDate(slot.getSlotDate());
+            appointment.setAppointmentTime(slot.getSlotTime());
+            appointment.setConsultationFee(doctor.getConsultationFee().doubleValue());
+            appointment.setReasonForVisit(request.getReasonForVisit());
+            appointment.setSymptoms(request.getSymptoms());
+            appointment.setAppointmentType(request.getAppointmentType());
+            appointment.setIsFirstVisit(request.getIsFirstVisit());
+            appointment.setPatientPhone(request.getPatientPhone());
+            appointment.setPatientEmail(request.getPatientEmail() != null ? request.getPatientEmail() : patient.getEmail());
+            appointment.setEmergencyContact(request.getEmergencyContact());
+            appointment.setMedicalHistory(request.getMedicalHistory());
+            appointment.setStatus(AppointmentStatus.SCHEDULED);
+            appointment.setPaymentStatus(Appointment.PaymentStatus.PAID);
+            appointment.setRazorpayOrderId(request.getRazorpayOrderId());
             appointment.setRazorpayPaymentId(request.getRazorpayPaymentId());
             appointment.setRazorpaySignature(request.getRazorpaySignature());
-            appointment.setPaymentStatus(Appointment.PaymentStatus.PAID);
             appointment.setPaymentDate(LocalDateTime.now());
-            // Keep as SCHEDULED - requires doctor approval to become CONFIRMED
-            appointment.setStatus(AppointmentStatus.SCHEDULED);
             
-            Appointment confirmedAppointment = appointmentRepository.save(appointment);
+            Appointment savedAppointment = appointmentRepository.save(appointment);
+            System.out.println("✅ Appointment created with ID: " + savedAppointment.getId());
             
             // Book the slot
-            AppointmentSlot slot = slotRepository.findByDoctorIdAndSlotDateAndSlotTimeAndIsActive(
-                appointment.getDoctor().getId(),
-                appointment.getAppointmentDate(),
-                appointment.getAppointmentTime(),
-                true
-            ).orElse(null);
-            
-            if (slot != null) {
-                slot.bookSlot();
-                slotRepository.save(slot);
-            }
+            slot.bookSlot();
+            slotRepository.save(slot);
+            System.out.println("✅ Slot booked successfully");
             
             // Note: Confirmation email will be sent when doctor approves the appointment
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("appointmentId", confirmedAppointment.getId());
-            response.put("status", confirmedAppointment.getStatus());
-            response.put("paymentStatus", confirmedAppointment.getPaymentStatus());
+            response.put("appointmentId", savedAppointment.getId());
+            response.put("status", savedAppointment.getStatus());
+            response.put("paymentStatus", savedAppointment.getPaymentStatus());
             response.put("message", "🎉 Appointment booked successfully! Your appointment is under review. You will be notified via your registered email once the doctor approves your booking. Thank you for choosing HealthBridge!");
             
             return ResponseEntity.ok(response);
@@ -355,6 +390,16 @@ public class AppointmentBookingController {
         private String razorpayOrderId;
         private String razorpayPaymentId;
         private String razorpaySignature;
+        private Long slotId;
+        private Long doctorId;
+        private String reasonForVisit;
+        private String symptoms;
+        private String appointmentType;
+        private Boolean isFirstVisit;
+        private String patientPhone;
+        private String patientEmail;
+        private String emergencyContact;
+        private String medicalHistory;
         
         // Getters and setters
         public String getRazorpayOrderId() { return razorpayOrderId; }
@@ -365,5 +410,35 @@ public class AppointmentBookingController {
         
         public String getRazorpaySignature() { return razorpaySignature; }
         public void setRazorpaySignature(String razorpaySignature) { this.razorpaySignature = razorpaySignature; }
+        
+        public Long getSlotId() { return slotId; }
+        public void setSlotId(Long slotId) { this.slotId = slotId; }
+        
+        public Long getDoctorId() { return doctorId; }
+        public void setDoctorId(Long doctorId) { this.doctorId = doctorId; }
+        
+        public String getReasonForVisit() { return reasonForVisit; }
+        public void setReasonForVisit(String reasonForVisit) { this.reasonForVisit = reasonForVisit; }
+        
+        public String getSymptoms() { return symptoms; }
+        public void setSymptoms(String symptoms) { this.symptoms = symptoms; }
+        
+        public String getAppointmentType() { return appointmentType; }
+        public void setAppointmentType(String appointmentType) { this.appointmentType = appointmentType; }
+        
+        public Boolean getIsFirstVisit() { return isFirstVisit; }
+        public void setIsFirstVisit(Boolean isFirstVisit) { this.isFirstVisit = isFirstVisit; }
+        
+        public String getPatientPhone() { return patientPhone; }
+        public void setPatientPhone(String patientPhone) { this.patientPhone = patientPhone; }
+        
+        public String getPatientEmail() { return patientEmail; }
+        public void setPatientEmail(String patientEmail) { this.patientEmail = patientEmail; }
+        
+        public String getEmergencyContact() { return emergencyContact; }
+        public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
+        
+        public String getMedicalHistory() { return medicalHistory; }
+        public void setMedicalHistory(String medicalHistory) { this.medicalHistory = medicalHistory; }
     }
 }
