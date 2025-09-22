@@ -1,15 +1,9 @@
 # SPA fallback for client-side routing
 /*    /index.html   200
 
-# Specific route fallbacks
+# Additional fallbacks for common routes
 /auth/*    /index.html   200
 /patient/*    /index.html   200
 /doctor/*    /index.html   200
 /admin/*    /index.html   200
 /info/*    /index.html   200
-
-# API routes should not be redirected
-/api/*    /api/*    200
-
-# Static assets should not be redirected
-/assets/*    /assets/*    200
