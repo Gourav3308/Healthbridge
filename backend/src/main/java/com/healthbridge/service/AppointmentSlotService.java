@@ -94,11 +94,15 @@ public class AppointmentSlotService {
     
     // Create default schedule and slots for a doctor (for demo purposes)
     public void createDefaultScheduleForDoctor(Long doctorId) {
+        System.out.println("Creating default schedule for doctor ID: " + doctorId);
+        
         // This method can be used to create a default schedule for doctors
         // For now, we'll create a simple 9 AM to 5 PM schedule for weekdays
         
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(30);
+        
+        System.out.println("Generating slots from " + startDate + " to " + endDate);
         
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             // Skip weekends (Saturday = 6, Sunday = 7)
@@ -111,41 +115,54 @@ public class AppointmentSlotService {
                 .findByDoctorIdAndScheduleDateAndIsActive(doctorId, date, true);
             
             if (existingSchedules.isEmpty()) {
+                System.out.println("Creating schedule for date: " + date);
+                
                 // Create morning schedule (9 AM to 1 PM)
                 DoctorSchedule morningSchedule = new DoctorSchedule();
-                morningSchedule.setDoctor(new com.healthbridge.entity.Doctor());
-                morningSchedule.getDoctor().setId(doctorId);
+                // Get the actual doctor entity
+                com.healthbridge.entity.Doctor doctor = new com.healthbridge.entity.Doctor();
+                doctor.setId(doctorId);
+                morningSchedule.setDoctor(doctor);
                 morningSchedule.setScheduleDate(date);
                 morningSchedule.setStartTime(LocalTime.of(9, 0));
                 morningSchedule.setEndTime(LocalTime.of(13, 0));
                 morningSchedule.setSlotDurationMinutes(30);
                 morningSchedule.setMaxPatientsPerSlot(1);
                 morningSchedule.setStatus(DoctorSchedule.ScheduleStatus.AVAILABLE);
+                morningSchedule.setIsActive(true);
                 
-                scheduleRepository.save(morningSchedule);
+                DoctorSchedule savedMorningSchedule = scheduleRepository.save(morningSchedule);
+                System.out.println("Saved morning schedule with ID: " + savedMorningSchedule.getId());
                 
                 // Generate slots for morning schedule
-                List<AppointmentSlot> morningSlots = generateSlotsForSchedule(morningSchedule);
+                List<AppointmentSlot> morningSlots = generateSlotsForSchedule(savedMorningSchedule);
                 slotRepository.saveAll(morningSlots);
+                System.out.println("Created " + morningSlots.size() + " morning slots");
                 
                 // Create afternoon schedule (2 PM to 6 PM)
                 DoctorSchedule afternoonSchedule = new DoctorSchedule();
-                afternoonSchedule.setDoctor(new com.healthbridge.entity.Doctor());
-                afternoonSchedule.getDoctor().setId(doctorId);
+                afternoonSchedule.setDoctor(doctor);
                 afternoonSchedule.setScheduleDate(date);
                 afternoonSchedule.setStartTime(LocalTime.of(14, 0));
                 afternoonSchedule.setEndTime(LocalTime.of(18, 0));
                 afternoonSchedule.setSlotDurationMinutes(30);
                 afternoonSchedule.setMaxPatientsPerSlot(1);
                 afternoonSchedule.setStatus(DoctorSchedule.ScheduleStatus.AVAILABLE);
+                afternoonSchedule.setIsActive(true);
                 
-                scheduleRepository.save(afternoonSchedule);
+                DoctorSchedule savedAfternoonSchedule = scheduleRepository.save(afternoonSchedule);
+                System.out.println("Saved afternoon schedule with ID: " + savedAfternoonSchedule.getId());
                 
                 // Generate slots for afternoon schedule
-                List<AppointmentSlot> afternoonSlots = generateSlotsForSchedule(afternoonSchedule);
+                List<AppointmentSlot> afternoonSlots = generateSlotsForSchedule(savedAfternoonSchedule);
                 slotRepository.saveAll(afternoonSlots);
+                System.out.println("Created " + afternoonSlots.size() + " afternoon slots");
+            } else {
+                System.out.println("Schedule already exists for date: " + date);
             }
         }
+        
+        System.out.println("Completed creating default schedule for doctor ID: " + doctorId);
     }
     
     // Clean up expired slots
