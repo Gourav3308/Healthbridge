@@ -7,6 +7,7 @@ import { Doctor } from '../../../models/doctor.model';
 import { AppointmentService } from '../../../services/appointment.service';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
+import { ImageService } from '../../../services/image.service';
 import { NotificationService } from '../../../services/notification.service';
 import { environment } from '../../../../environments/environment';
 import { ScheduleService } from '../../../services/schedule.service';
@@ -701,6 +702,7 @@ export class BookAppointmentComponent implements OnInit {
     private appointmentService: AppointmentService,
     public scheduleService: ScheduleService,
     private authService: AuthService,
+    private imageService: ImageService,
     private notificationService: NotificationService
   ) {
     this.appointmentForm = this.fb.group({
@@ -1112,7 +1114,7 @@ export class BookAppointmentComponent implements OnInit {
   }
 
   getDoctorImageUrl(doctor: Doctor): string {
-    return 'https://via.placeholder.com/80x80/28a745/ffffff?text=Dr.' + (doctor.firstName?.charAt(0) || 'D');
+    return this.imageService.getFullImageUrl(doctor?.profileImageUrl);
   }
 
   getDateNumber(dateString: string): string {

@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Doctor } from '../../../models/doctor.model';
 import { AdminService } from '../../../services/admin.service';
+import { ImageService } from '../../../services/image.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 
@@ -361,7 +362,8 @@ export class DoctorDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -396,17 +398,7 @@ export class DoctorDetailsComponent implements OnInit {
   }
 
   getDoctorImageUrl(): string {
-    // Check if doctor has a profile image URL
-    if (this.doctor?.profileImageUrl) {
-      // If it's a relative URL, make it absolute
-      if (this.doctor.profileImageUrl.startsWith('/')) {
-        return 'http://10.45.254.162:8081' + this.doctor.profileImageUrl;
-      }
-      return this.doctor.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    return `https://via.placeholder.com/120x120/667eea/ffffff?text=${this.doctor?.firstName?.charAt(0) || 'D'}`;
+    return this.imageService.getFullImageUrl(this.doctor?.profileImageUrl);
   }
 
   formatDate(date: string | Date | undefined): string {

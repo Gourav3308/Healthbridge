@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Patient } from '../../../models/patient.model';
 import { AdminService } from '../../../services/admin.service';
 import { AuthService } from '../../../services/auth.service';
+import { ImageService } from '../../../services/image.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 
@@ -413,7 +414,8 @@ export class ManagePatientsComponent implements OnInit {
     private adminService: AdminService,
     private authService: AuthService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private imageService: ImageService
   ) {
     this.editForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -549,17 +551,7 @@ export class ManagePatientsComponent implements OnInit {
   }
 
   getPatientImageUrl(patient: Patient): string {
-    // Check if patient has a profile image URL
-    if (patient?.profileImageUrl) {
-      // If it's a relative URL, make it absolute
-      if (patient.profileImageUrl.startsWith('/')) {
-        return 'http://10.45.254.162:8081' + patient.profileImageUrl;
-      }
-      return patient.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    return `https://via.placeholder.com/40x40/667eea/ffffff?text=${patient.firstName?.charAt(0) || 'P'}`;
+    return this.imageService.getFullImageUrl(patient?.profileImageUrl);
   }
 
   calculateAge(dateOfBirth: string | Date | undefined): number {

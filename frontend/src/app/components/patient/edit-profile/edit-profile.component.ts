@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { Patient, PatientUpdateRequest } from '../../../models/patient.model';
 import { AuthService } from '../../../services/auth.service';
+import { ImageService } from '../../../services/image.service';
 import { PatientService } from '../../../services/patient.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
@@ -274,7 +275,8 @@ export class EditProfileComponent implements OnInit {
     private fb: FormBuilder,
     private patientService: PatientService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private imageService: ImageService
   ) {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required]],
@@ -459,13 +461,7 @@ export class EditProfileComponent implements OnInit {
   }
 
   getProfileImageUrl(): string {
-    if (this.currentPatient?.profileImageUrl) {
-      return this.currentPatient.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    const firstName = this.currentPatient?.firstName || 'P';
-    return `https://via.placeholder.com/120x120/007bff/ffffff?text=${firstName.charAt(0)}`;
+    return this.imageService.getFullImageUrl(this.currentPatient?.profileImageUrl);
   }
 
   onImageSelect(event: any): void {

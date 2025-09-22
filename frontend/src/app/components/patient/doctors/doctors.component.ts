@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Doctor } from '../../../models/doctor.model';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
+import { ImageService } from '../../../services/image.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 
@@ -230,7 +231,8 @@ export class DoctorsComponent implements OnInit {
     private fb: FormBuilder,
     private doctorService: DoctorService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private imageService: ImageService
   ) {
     this.searchForm = this.fb.group({
       keyword: [''],
@@ -338,17 +340,7 @@ export class DoctorsComponent implements OnInit {
   }
 
   getDoctorImageUrl(doctor: any): string {
-    // Check if doctor has a profile image URL
-    if (doctor?.profileImageUrl) {
-      // If it's a relative URL, make it absolute
-      if (doctor.profileImageUrl.startsWith('/')) {
-        return 'http://10.45.254.162:8081' + doctor.profileImageUrl;
-      }
-      return doctor.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    return 'https://via.placeholder.com/50x50/28a745/ffffff?text=Dr.' + (doctor.firstName?.charAt(0) || 'D');
+    return this.imageService.getFullImageUrl(doctor?.profileImageUrl);
   }
 
   goBack(): void {

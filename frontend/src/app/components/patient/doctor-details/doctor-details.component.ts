@@ -6,6 +6,7 @@ import { Doctor } from '../../../models/doctor.model';
 import { Review, ReviewRequest, ReviewStats } from '../../../models/review.model';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
+import { ImageService } from '../../../services/image.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ReviewService } from '../../../services/review.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
@@ -643,7 +644,8 @@ export class DoctorDetailsComponent implements OnInit {
     private authService: AuthService,
     public reviewService: ReviewService,
     private notificationService: NotificationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private imageService: ImageService
   ) {
     this.reviewForm = this.fb.group({
       comment: ['', [Validators.maxLength(1000)]]
@@ -933,17 +935,7 @@ export class DoctorDetailsComponent implements OnInit {
   }
 
   getDoctorImageUrl(doctor: any): string {
-    // Check if doctor has a profile image URL
-    if (doctor?.profileImageUrl) {
-      // If it's a relative URL, make it absolute
-      if (doctor.profileImageUrl.startsWith('/')) {
-        return 'http://10.45.254.162:8081' + doctor.profileImageUrl;
-      }
-      return doctor.profileImageUrl;
-    }
-    
-    // Fallback to default avatar
-    return 'https://via.placeholder.com/100x100/28a745/ffffff?text=Dr.' + (doctor.firstName?.charAt(0) || 'D');
+    return this.imageService.getFullImageUrl(doctor?.profileImageUrl);
   }
 
   getStarsArray(rating: number): number[] {
