@@ -116,6 +116,8 @@ public class AdminService {
         }
         
         // Generate default schedule and appointment slots for the newly approved doctor
+        // Temporarily disabled for testing
+        /*
         try {
             appointmentSlotService.createDefaultScheduleForDoctor(savedDoctor.getId());
             System.out.println("Default schedule and slots created for doctor: " + savedDoctor.getEmail());
@@ -124,6 +126,8 @@ public class AdminService {
             System.err.println("Error: " + e.getMessage());
             // Don't throw exception here - we don't want slot generation failure to break the approval process
         }
+        */
+        System.out.println("Skipping schedule creation for testing purposes");
         
         return savedDoctor;
     }
