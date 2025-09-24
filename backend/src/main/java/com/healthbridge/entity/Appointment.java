@@ -121,6 +121,15 @@ public class Appointment {
     @Column(name = "reminder_sent")
     private Boolean reminderSent = false;
     
+    @Column(name = "cancellation_reason", columnDefinition = "TEXT")
+    private String cancellationReason;
+    
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+    
+    @Column(name = "cancelled_by")
+    private String cancelledBy; // "PATIENT" or "DOCTOR"
+    
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -354,6 +363,30 @@ public class Appointment {
     
     public void setReminderSent(Boolean reminderSent) {
         this.reminderSent = reminderSent;
+    }
+    
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+    
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+    
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+    
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+    
+    public String getCancelledBy() {
+        return cancelledBy;
+    }
+    
+    public void setCancelledBy(String cancelledBy) {
+        this.cancelledBy = cancelledBy;
     }
     
     @Override

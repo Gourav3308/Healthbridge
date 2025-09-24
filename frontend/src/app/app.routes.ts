@@ -50,6 +50,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/patient/appointments/appointments.component').then(m => m.AppointmentsComponent)
       },
       {
+        path: 'cancellation-details/:id',
+        loadComponent: () => import('./components/patient/cancellation-details/cancellation-details.component').then(m => m.CancellationDetailsComponent)
+      },
+      {
         path: 'book-appointment',
         loadComponent: () => import('./components/patient/book-appointment/book-appointment.component').then(m => m.BookAppointmentComponent)
       },
@@ -110,6 +114,10 @@ export const routes: Routes = [
       {
         path: 'doctor-details/:id',
         loadComponent: () => import('./components/admin/doctor-details/doctor-details.component').then(m => m.DoctorDetailsComponent)
+      },
+      {
+        path: 'reject-doctor/:id',
+        loadComponent: () => import('./components/admin/doctor-rejection/doctor-rejection.component').then(m => m.DoctorRejectionComponent)
       },
       {
         path: 'edit-doctor/:id',
@@ -197,7 +205,7 @@ export const routes: Routes = [
           },
           {
             path: 'bone-joint-care',
-            loadComponent: () => import('./components/info/medicine-categories/general-medicine/general-medicine.component').then(m => m.GeneralMedicineComponent)
+            loadComponent: () => import('./components/info/medicine-categories/bone-joint-care/bone-joint-care.component').then(m => m.BoneJointCareComponent)
           },
           {
             path: 'immune-support',
@@ -205,11 +213,11 @@ export const routes: Routes = [
           },
           {
             path: 'mental-health',
-            loadComponent: () => import('./components/info/medicine-categories/neurological/neurological.component').then(m => m.NeurologicalComponent)
+            loadComponent: () => import('./components/info/medicine-categories/mental-health/mental-health.component').then(m => m.MentalHealthComponent)
           },
           {
             path: 'elderly-care',
-            loadComponent: () => import('./components/info/medicine-categories/general-medicine/general-medicine.component').then(m => m.GeneralMedicineComponent)
+            loadComponent: () => import('./components/info/medicine-categories/elderly-care/elderly-care.component').then(m => m.ElderlyCareComponent)
           },
           {
             path: 'emergency-medicines',

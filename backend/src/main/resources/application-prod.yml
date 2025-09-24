@@ -33,8 +33,8 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+            client-id: ${GOOGLE_CLIENT_ID:468629260262-6ua09pru34mlsjerlvuhjocvn09mrlje.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET: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}
             scope: profile,email
             redirect-uri: https://healthbridge-1-piny.onrender.com/login/oauth2/code/google
         provider:

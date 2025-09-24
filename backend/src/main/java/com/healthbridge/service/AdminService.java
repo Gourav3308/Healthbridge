@@ -140,6 +140,56 @@ public class AdminService {
         doctorRepository.delete(doctor);
     }
     
+    public void rejectDoctorWithReason(Long doctorId, String reason) {
+        System.out.println("=== ADMIN SERVICE REJECTION DEBUG ===");
+        System.out.println("Doctor ID: " + doctorId);
+        System.out.println("Reason: " + reason);
+        
+        Doctor doctor = doctorRepository.findById(doctorId)
+            .orElseThrow(() -> new RuntimeException("Doctor not found with ID: " + doctorId));
+        
+        System.out.println("Doctor found: " + doctor.getFirstName() + " " + doctor.getLastName());
+        System.out.println("Doctor email: " + doctor.getEmail());
+        System.out.println("Doctor approved: " + doctor.getIsApproved());
+        
+        if (doctor.getIsApproved()) {
+            throw new RuntimeException("Cannot reject an approved doctor. Doctor " + doctor.getFirstName() + " " + doctor.getLastName() + " is already approved.");
+        }
+        
+        // Send rejection email to doctor (optional - don't fail if email fails)
+        try {
+            System.out.println("📧 Attempting to send rejection email...");
+            String subject = "Doctor Registration Rejected - Healthbridge";
+            String message = "Dear Dr. " + doctor.getFirstName() + " " + doctor.getLastName() + ",\n\n" +
+                "We regret to inform you that your doctor registration with Healthbridge has been rejected.\n\n" +
+                "Reason for Rejection:\n" + reason + "\n\n" +
+                "If you believe this decision was made in error, please contact our support team at healthbridge13012002@gmail.com.\n\n" +
+                "Best regards,\n" +
+                "Healthbridge Admin Team";
+            
+            emailService.sendEmail(doctor.getEmail(), subject, message);
+            System.out.println("✅ Rejection email sent successfully to: " + doctor.getEmail());
+            
+        } catch (Exception emailError) {
+            System.err.println("⚠️ Email sending failed, but continuing with rejection: " + emailError.getMessage());
+            // Continue with rejection even if email fails
+        }
+        
+        // Delete doctor (handle potential foreign key constraints)
+        System.out.println("🗑️ Deleting doctor from database...");
+        try {
+            doctorRepository.delete(doctor);
+            System.out.println("✅ Doctor deleted successfully");
+        } catch (Exception deleteError) {
+            System.err.println("⚠️ Error deleting doctor: " + deleteError.getMessage());
+            // If deletion fails due to foreign key constraints, just mark as rejected
+            doctor.setIsApproved(false);
+            doctor.setIsActive(false);
+            doctorRepository.save(doctor);
+            System.out.println("✅ Doctor marked as rejected instead of deleted");
+        }
+    }
+    
     public Doctor getDoctorById(Long doctorId) {
         return doctorRepository.findById(doctorId)
             .orElseThrow(() -> new RuntimeException("Doctor not found"));

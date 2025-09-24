@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AppointmentService } from '../../../services/appointment.service';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
 import { ImageService } from '../../../services/image.service';
@@ -30,6 +31,9 @@ import { HeaderComponent } from '../../shared/header/header.component';
             <div>
               <h1 class="mb-1">Welcome, Dr. {{ currentUser?.firstName }}!</h1>
               <p class="text-muted">Manage your practice and appointments</p>
+              <div class="doctor-id-badge" style="display: inline-block; background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem;">
+                <i class="fas fa-user-md me-1"></i>Doctor ID: {{ currentUser?.id || 'N/A' }}
+              </div>
             </div>
           </div>
           <div class="user-actions d-flex align-items-center" style="gap: 1rem;">
@@ -110,10 +114,22 @@ import { HeaderComponent } from '../../shared/header/header.component';
                     <p class="text-muted mb-1">{{ appointment.reason }}</p>
                     <small class="text-sm">{{ appointment.type }}</small>
                   </div>
-                  <div class="timeline-actions">
+                  <div class="timeline-actions d-flex align-items-center gap-2">
                     <span class="badge" [class]="getStatusClass(appointment.status)">
                       {{ appointment.status }}
                     </span>
+                    <div class="action-buttons" *ngIf="appointment.status === 'SCHEDULED'">
+                      <button class="btn btn-sm btn-success" 
+                              (click)="confirmAppointment(appointment)"
+                              title="Confirm Appointment">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger" 
+                              (click)="rejectAppointment(appointment)"
+                              title="Reject Appointment">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
@@ -282,6 +298,17 @@ import { HeaderComponent } from '../../shared/header/header.component';
       color: white;
     }
     
+    .action-buttons {
+      display: flex;
+      gap: 0.25rem;
+    }
+    
+    .action-buttons .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      min-width: 30px;
+    }
+    
     @media (max-width: 768px) {
       .dashboard-header {
         flex-direction: column;
@@ -310,7 +337,8 @@ export class DashboardComponent implements OnInit {
     private authService: AuthService,
     private doctorService: DoctorService,
     private reviewService: ReviewService,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private appointmentService: AppointmentService
   ) {}
 
   ngOnInit(): void {
@@ -337,6 +365,9 @@ export class DashboardComponent implements OnInit {
     this.monthlyEarnings = 0;
     
     this.todaySchedule = [];
+    
+    // Load today's appointments
+    this.loadTodayAppointments();
     
     // Load reviews and ratings
     this.loadReviews();
@@ -366,6 +397,35 @@ export class DashboardComponent implements OnInit {
           console.error('Error loading reviews:', error);
           this.recentReviews = [];
           this.averageRating = 0.0;
+        }
+      });
+    }
+  }
+
+  loadTodayAppointments(): void {
+    if (this.currentUser && this.currentUser.role === 'DOCTOR') {
+      this.doctorService.getTodayAppointments().subscribe({
+        next: (appointments) => {
+          console.log('Today\'s appointments loaded:', appointments);
+          this.todayAppointments = appointments.length;
+          
+          // Transform appointments for display
+          this.todaySchedule = appointments.map(appointment => ({
+            id: appointment.id,
+            time: this.formatTime(appointment.appointmentTime),
+            patientName: this.getPatientName(appointment),
+            reason: appointment.reasonForVisit,
+            type: appointment.appointmentType,
+            status: appointment.status,
+            originalAppointment: appointment // Keep reference to original appointment
+          }));
+          
+          console.log('Today\'s schedule:', this.todaySchedule);
+        },
+        error: (error) => {
+          console.error('Error loading today\'s appointments:', error);
+          this.todayAppointments = 0;
+          this.todaySchedule = [];
         }
       });
     }
@@ -423,6 +483,64 @@ export class DashboardComponent implements OnInit {
       month: 'short', 
       day: 'numeric' 
     });
+  }
+
+  formatTime(timeString: string): string {
+    if (!timeString) return '';
+    // Assuming timeString is in HH:mm format
+    return timeString;
+  }
+
+  getPatientName(appointment: any): string {
+    if (appointment.patient) {
+      return `${appointment.patient.firstName || 'Unknown'} ${appointment.patient.lastName || ''}`.trim();
+    }
+    return 'Unknown Patient';
+  }
+
+  confirmAppointment(appointment: any): void {
+    this.appointmentService.updateAppointmentStatus(appointment.id, 'CONFIRMED').subscribe({
+      next: (updatedAppointment) => {
+        // Update the appointment status in the schedule
+        const scheduleItem = this.todaySchedule.find(item => item.id === appointment.id);
+        if (scheduleItem) {
+          scheduleItem.status = 'CONFIRMED';
+        }
+        
+        const patientName = appointment.patientName;
+        const appointmentTime = appointment.time;
+        
+        alert(`✅ Appointment Confirmed!\n\nPatient: ${patientName}\nTime: ${appointmentTime}\n\nThe patient will be notified about the confirmation.`);
+        
+        // Reload today's appointments to get updated data
+        this.loadTodayAppointments();
+      },
+      error: (error) => {
+        console.error('Error confirming appointment:', error);
+        alert('Failed to confirm appointment. Please try again.');
+      }
+    });
+  }
+
+  rejectAppointment(appointment: any): void {
+    if (confirm(`Are you sure you want to reject this appointment with ${appointment.patientName}?`)) {
+      this.appointmentService.updateAppointmentStatus(appointment.id, 'CANCELLED').subscribe({
+        next: (updatedAppointment) => {
+          // Remove from today's schedule
+          this.todaySchedule = this.todaySchedule.filter(item => item.id !== appointment.id);
+          this.todayAppointments = this.todaySchedule.length;
+          
+          alert(`Appointment with ${appointment.patientName} has been rejected.`);
+          
+          // Reload today's appointments to get updated data
+          this.loadTodayAppointments();
+        },
+        error: (error) => {
+          console.error('Error rejecting appointment:', error);
+          alert('Failed to reject appointment. Please try again.');
+        }
+      });
+    }
   }
 
   logout(): void {

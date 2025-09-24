@@ -39,17 +39,17 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     List<Doctor> findByExperienceYearsGreaterThanEqual(@Param("years") Integer years);
     
     @Query("SELECT d FROM Doctor d WHERE " +
-           "(d.specialization LIKE %:keyword% OR " +
-           "d.firstName LIKE %:keyword% OR " +
-           "d.lastName LIKE %:keyword% OR " +
-           "d.hospitalAffiliation LIKE %:keyword% OR " +
-           "d.city LIKE %:keyword%) AND " +
+           "(LOWER(d.specialization) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.hospitalAffiliation) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(d.city) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "d.isApproved = true")
     List<Doctor> searchDoctors(@Param("keyword") String keyword);
     
     @Query("SELECT d FROM Doctor d WHERE " +
-           "(:specialization IS NULL OR d.specialization = :specialization) AND " +
-           "(:city IS NULL OR d.city = :city) AND " +
+           "(:specialization IS NULL OR LOWER(d.specialization) = LOWER(:specialization)) AND " +
+           "(:city IS NULL OR LOWER(d.city) = LOWER(:city)) AND " +
            "(:minFee IS NULL OR d.consultationFee >= :minFee) AND " +
            "(:maxFee IS NULL OR d.consultationFee <= :maxFee) AND " +
            "(:minExperience IS NULL OR d.experienceYears >= :minExperience) AND " +
@@ -73,4 +73,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     
     @Query("SELECT DISTINCT d.city FROM Doctor d WHERE d.isApproved = true AND d.city IS NOT NULL ORDER BY d.city")
     List<String> findAllCities();
+    
+    // OAuth2 methods
+    List<Doctor> findAllByGoogleId(String googleId);
 }

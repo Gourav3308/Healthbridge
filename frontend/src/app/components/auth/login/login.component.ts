@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
@@ -9,7 +9,7 @@ import { HeaderComponent } from '../../shared/header/header.component';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, FooterComponent, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, FooterComponent, HeaderComponent],
   template: `
     <!-- Dynamic 3D Header -->
     <app-header></app-header>
@@ -312,6 +312,37 @@ import { HeaderComponent } from '../../shared/header/header.component';
     .btn-google i {
       color: #4285f4;
     }
+    
+    /* Role Selection Styles */
+    .role-selection .btn-group {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .role-selection .btn-check:checked + .btn,
+    .role-selection .btn.active {
+      background: linear-gradient(135deg, #1e3c72, #00ff7f);
+      border-color: #00ff7f;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+    }
+    
+    .role-selection .btn {
+      border: 2px solid #ddd;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 600;
+    }
+    
+    .role-selection .btn:hover {
+      border-color: #1e90ff;
+      color: #1e90ff;
+      transform: translateY(-1px);
+    }
+    
+    .role-selection .btn i {
+      font-size: 1.1rem;
+    }
   `]
 })
 export class LoginComponent implements OnInit {
@@ -344,6 +375,8 @@ export class LoginComponent implements OnInit {
       // Handle OAuth error parameters
       if (params['error'] === 'oauth_failed') {
         this.errorMessage = 'Google login failed. Please try again or use email/password login.';
+      } else if (params['error'] === 'oauth_not_allowed_for_doctors') {
+        this.errorMessage = 'Google OAuth is not available for doctors. Please use email and password to sign in.';
       }
     });
   }
@@ -393,6 +426,7 @@ export class LoginComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
+    console.log('Login with Google');
     this.authService.loginWithGoogle();
   }
 }

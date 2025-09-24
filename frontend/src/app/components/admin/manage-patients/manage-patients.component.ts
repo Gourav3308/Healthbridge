@@ -134,7 +134,9 @@ import { HeaderComponent } from '../../shared/header/header.component';
                              class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
                         <div>
                           <div class="fw-semibold">{{ patient.firstName }} {{ patient.lastName }}</div>
-                          <small class="text-muted">ID: {{ patient.id }}</small>
+                          <div class="patient-id-badge" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.125rem 0.5rem; border-radius: 10px; font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem;">
+                            <i class="fas fa-id-card me-1"></i>ID: {{ patient.id }}
+                          </div>
                         </div>
                       </div>
                     </td>

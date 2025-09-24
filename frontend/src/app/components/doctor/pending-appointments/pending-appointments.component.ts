@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Appointment } from '../../../models/appointment.model';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
+import { ImageService } from '../../../services/image.service';
 import { NotificationService } from '../../../services/notification.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
@@ -11,7 +13,7 @@ import { HeaderComponent } from '../../shared/header/header.component';
 @Component({
   selector: 'app-pending-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FooterComponent, HeaderComponent],
+  imports: [CommonModule, RouterModule, FormsModule, FooterComponent, HeaderComponent],
   template: `
     <app-header></app-header>
     
@@ -216,6 +218,53 @@ import { HeaderComponent } from '../../shared/header/header.component';
     </div>
 
     <app-footer></app-footer>
+
+    <!-- Cancellation Reason Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="rejectModalLabel">
+              <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+              Reject Appointment
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Please provide a reason for rejecting this appointment.</strong>
+              <br>This information will be shared with the patient.
+            </div>
+            
+            <div class="mb-3">
+              <label for="rejectionReason" class="form-label">
+                <i class="fas fa-comment me-2"></i>Cancellation Reason
+              </label>
+              <textarea 
+                class="form-control" 
+                id="rejectionReason" 
+                rows="4" 
+                [(ngModel)]="cancellationReason"
+                placeholder="Please provide a clear reason for rejecting this appointment..."
+                required>
+              </textarea>
+              <div class="form-text">
+                Minimum 10 characters required. This will be sent to the patient.
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Cancel
+            </button>
+            <button type="button" class="btn btn-danger" (click)="confirmRejection()" [disabled]="!cancellationReason || cancellationReason.length < 10">
+              <i class="fas fa-ban me-2"></i>Reject Appointment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
     .pending-appointments-container {
@@ -278,6 +327,8 @@ export class PendingAppointmentsComponent implements OnInit {
   pendingAppointments: Appointment[] = [];
   isLoading = false;
   processingAppointmentId: number | null = null;
+  selectedAppointment: Appointment | null = null;
+  cancellationReason = '';
   
   // Stats
   approvedToday = 0;
@@ -286,6 +337,7 @@ export class PendingAppointmentsComponent implements OnInit {
   constructor(
     private doctorService: DoctorService,
     private authService: AuthService,
+    private imageService: ImageService,
     private notificationService: NotificationService,
     private router: Router
   ) {}
@@ -364,23 +416,64 @@ export class PendingAppointmentsComponent implements OnInit {
   }
 
   rejectAppointment(appointment: Appointment): void {
-    if (confirm(`Are you sure you want to reject the appointment for ${appointment.patient.firstName} ${appointment.patient.lastName}? This action cannot be undone.`)) {
-      this.processingAppointmentId = appointment.id;
-      
-      this.doctorService.rejectAppointment(appointment.id).subscribe({
-        next: (response) => {
-          this.notificationService.success('Success', 'Appointment rejected and patient notified.');
-          this.pendingAppointments = this.pendingAppointments.filter(apt => apt.id !== appointment.id);
-          this.calculateStats();
-          this.processingAppointmentId = null;
-        },
-        error: (error) => {
-          console.error('Error rejecting appointment:', error);
-          this.notificationService.error('Error', 'Failed to reject appointment. Please try again.');
-          this.processingAppointmentId = null;
-        }
-      });
+    this.selectedAppointment = appointment;
+    this.cancellationReason = '';
+    
+    // Show the modal
+    const modal = document.getElementById('rejectModal');
+    if (modal) {
+      const bootstrap = (window as any).bootstrap;
+      if (bootstrap) {
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+      }
     }
+  }
+
+  confirmRejection(): void {
+    if (!this.selectedAppointment || !this.cancellationReason || this.cancellationReason.length < 10) {
+      this.notificationService.error('Error', 'Please provide a valid cancellation reason (minimum 10 characters).');
+      return;
+    }
+
+    this.processingAppointmentId = this.selectedAppointment.id;
+    
+    // Call the doctor service with cancellation reason
+    this.doctorService.rejectAppointmentWithReason(this.selectedAppointment.id, this.cancellationReason).subscribe({
+      next: (response) => {
+        this.notificationService.success('Success', 'Appointment rejected successfully! Patient has been notified with the cancellation reason.');
+        this.pendingAppointments = this.pendingAppointments.filter(apt => apt.id !== this.selectedAppointment!.id);
+        this.calculateStats();
+        this.processingAppointmentId = null;
+        
+        // Hide modal and reset form
+        this.hideModal();
+        this.resetForm();
+      },
+      error: (error) => {
+        console.error('Error rejecting appointment:', error);
+        this.notificationService.error('Error', 'Failed to reject appointment. Please try again.');
+        this.processingAppointmentId = null;
+      }
+    });
+  }
+
+  hideModal(): void {
+    const modal = document.getElementById('rejectModal');
+    if (modal) {
+      const bootstrap = (window as any).bootstrap;
+      if (bootstrap) {
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      }
+    }
+  }
+
+  resetForm(): void {
+    this.selectedAppointment = null;
+    this.cancellationReason = '';
   }
 
   refreshAppointments(): void {
@@ -392,8 +485,10 @@ export class PendingAppointmentsComponent implements OnInit {
   }
 
   getPatientImageUrl(patient: any): string {
-    return patient.profileImage || 
-           `https://via.placeholder.com/60x60/667eea/ffffff?text=${patient.firstName?.charAt(0) || 'P'}`;
+    if (!patient || !patient.profileImageUrl) {
+      return this.imageService.getDefaultAvatar();
+    }
+    return this.imageService.getFullImageUrl(patient.profileImageUrl);
   }
 
   calculateAge(dateOfBirth: string | Date | undefined): number | string {

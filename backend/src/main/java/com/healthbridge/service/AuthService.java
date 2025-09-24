@@ -50,8 +50,12 @@ public class AuthService {
     @Value("${frontend.url:https://healthbridge-frontend-jj1l.onrender.com}")
     private String frontendUrl;
     
-    // Fallback frontend URL in case environment variable is not set
-    private static final String FALLBACK_FRONTEND_URL = "https://healthbridge-frontend-jj1l.onrender.com";
+    private String getFrontendUrl() {
+        if (frontendUrl != null && !frontendUrl.trim().isEmpty()) {
+            return frontendUrl;
+        }
+        return "https://healthbridge-frontend-jj1l.onrender.com";
+    }
     
     public AuthResponse authenticate(AuthRequest request) {
         try {
@@ -182,8 +186,9 @@ public class AuthService {
         // Generate reset token (valid for 1 hour)
         String resetToken = jwtUtil.generatePasswordResetToken(email);
         
-        // Send reset email - SIMPLE HARDCODED SOLUTION
-        String resetLink = "https://healthbridge-frontend-jj1l.onrender.com/auth/reset-password?token=" + resetToken;
+        // Send reset email - Use configured frontend URL
+        String frontendUrl = getFrontendUrl();
+        String resetLink = frontendUrl + "/auth/reset-password?token=" + resetToken;
         
         // Debug logging
         System.out.println("=== PASSWORD RESET URL DEBUG ===");
@@ -193,7 +198,8 @@ public class AuthService {
         try {
             emailService.sendPasswordResetEmail(email, resetLink, 
                 patient != null ? patient.getFirstName() + " " + patient.getLastName() : 
-                doctor != null ? doctor.getFirstName() + " " + doctor.getLastName() : "User");
+                doctor != null ? doctor.getFirstName() + " " + doctor.getLastName() : "User",
+                frontendUrl);
             
             System.out.println("Password reset email sent to: " + email);
         } catch (Exception e) {

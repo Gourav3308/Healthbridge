@@ -22,6 +22,7 @@ public class PaymentService {
     private String razorpayKeySecret;
     
     private RazorpayClient razorpayClient;
+    private boolean isRazorpayEnabled = false;
     
     public PaymentService(@Value("${razorpay.key.id}") String keyId, 
                          @Value("${razorpay.key.secret}") String keySecret) {
@@ -31,28 +32,39 @@ public class PaymentService {
             System.out.println("Key Secret: " + (keySecret != null ? "***" + keySecret.substring(keySecret.length() - 4) : "null"));
             
             if (keyId == null || keyId.trim().isEmpty() || keyId.equals("your-razorpay-key-id")) {
-                throw new RuntimeException("Razorpay Key ID is not properly configured");
+                System.out.println("WARNING: Razorpay Key ID is not properly configured. Payment service will be disabled.");
+                this.isRazorpayEnabled = false;
+                return;
             }
             if (keySecret == null || keySecret.trim().isEmpty() || keySecret.equals("your-razorpay-secret")) {
-                throw new RuntimeException("Razorpay Key Secret is not properly configured");
+                System.out.println("WARNING: Razorpay Key Secret is not properly configured. Payment service will be disabled.");
+                this.isRazorpayEnabled = false;
+                return;
             }
             
             this.razorpayKeyId = keyId;
             this.razorpayKeySecret = keySecret;
             this.razorpayClient = new RazorpayClient(keyId, keySecret);
+            this.isRazorpayEnabled = true;
             System.out.println("Razorpay client initialized successfully");
         } catch (RazorpayException e) {
             System.err.println("Razorpay initialization error: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Failed to initialize Razorpay client", e);
+            System.out.println("Payment service will be disabled due to Razorpay initialization error");
+            this.isRazorpayEnabled = false;
         } catch (Exception e) {
             System.err.println("General initialization error: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Failed to initialize Razorpay client", e);
+            System.out.println("Payment service will be disabled due to initialization error");
+            this.isRazorpayEnabled = false;
         }
     }
     
     public Map<String, Object> createOrder(Double amount, String currency, String receipt) throws RazorpayException {
+        if (!isRazorpayEnabled) {
+            throw new RazorpayException("Payment service is not available. Razorpay is not configured.");
+        }
+        
         try {
             System.out.println("=== RAZORPAY CREATE ORDER DEBUG ===");
             System.out.println("Amount: " + amount);
@@ -86,6 +98,11 @@ public class PaymentService {
     }
     
     public boolean verifyPayment(String razorpayOrderId, String razorpayPaymentId, String razorpaySignature) {
+        if (!isRazorpayEnabled) {
+            System.out.println("Payment service is not available. Razorpay is not configured.");
+            return false;
+        }
+        
         try {
             JSONObject options = new JSONObject();
             options.put("razorpay_order_id", razorpayOrderId);
@@ -100,6 +117,10 @@ public class PaymentService {
     }
     
     public Map<String, Object> getPaymentDetails(String paymentId) throws RazorpayException {
+        if (!isRazorpayEnabled) {
+            throw new RazorpayException("Payment service is not available. Razorpay is not configured.");
+        }
+        
         try {
             com.razorpay.Payment payment = razorpayClient.payments.fetch(paymentId);
             
@@ -119,7 +140,11 @@ public class PaymentService {
     }
     
     public String getRazorpayKeyId() {
-        return razorpayKeyId;
+        return isRazorpayEnabled ? razorpayKeyId : null;
+    }
+    
+    public boolean isRazorpayEnabled() {
+        return isRazorpayEnabled;
     }
     
     // Create order for appointment booking
@@ -139,6 +164,10 @@ public class PaymentService {
     
     // Refund payment (if needed)
     public Map<String, Object> refundPayment(String paymentId, Double amount, String reason) throws RazorpayException {
+        if (!isRazorpayEnabled) {
+            throw new RazorpayException("Payment service is not available. Razorpay is not configured.");
+        }
+        
         try {
             JSONObject refundRequest = new JSONObject();
             if (amount != null) {

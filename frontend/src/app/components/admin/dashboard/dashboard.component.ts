@@ -205,6 +205,9 @@ import { HeaderComponent } from '../../shared/header/header.component';
                   </p>
                 </div>
                 <div class="approval-actions d-flex gap-2">
+                  <button class="btn btn-sm btn-info" (click)="viewDoctorDetails(doctor)" title="View Details">
+                    <i class="fas fa-eye"></i>
+                  </button>
                   <button class="btn btn-sm btn-success" (click)="approveDoctor(doctor)">
                     <i class="fas fa-check me-1"></i>Approve
                   </button>
@@ -382,6 +385,13 @@ import { HeaderComponent } from '../../shared/header/header.component';
       .approval-actions {
         width: 100%;
         justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .approval-actions .btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
       }
     }
   `]
@@ -469,33 +479,11 @@ export class DashboardComponent implements OnInit {
   }
 
   rejectDoctor(doctor: Doctor): void {
-    const doctorName = doctor.firstName + ' ' + doctor.lastName;
-    const reason = prompt(`Please provide a reason for rejecting Dr. ${doctorName}:`);
-    if (reason) {
-      this.adminService.rejectDoctor(doctor.id).subscribe({
-        next: (response) => {
-          // Remove from pending list
-          this.pendingDoctorsList = this.pendingDoctorsList.filter(d => d.id !== doctor.id);
-          this.pendingDoctors--;
-          
-          // Add to recent activities
-          this.recentActivities.unshift({
-            icon: 'fas fa-user-times',
-            color: 'var(--danger-color)',
-            message: `Dr. ${doctorName} application rejected`,
-            time: 'Just now',
-            status: 'Rejected',
-            statusClass: 'badge-danger'
-          });
-          
-          alert(`Dr. ${doctorName}'s application has been rejected.`);
-        },
-        error: (error) => {
-          console.error('Error rejecting doctor:', error);
-          alert('Failed to reject doctor. Please try again.');
-        }
-      });
-    }
+    this.router.navigate(['/admin/reject-doctor', doctor.id]);
+  }
+
+  viewDoctorDetails(doctor: Doctor): void {
+    this.router.navigate(['/admin/doctor-details', doctor.id]);
   }
 
   logout(): void {

@@ -1,6 +1,7 @@
 package com.healthbridge.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,5 +189,69 @@ public class AppointmentService {
             .orElseThrow(() -> new RuntimeException("Doctor not found"));
         
         return appointmentRepository.findUpcomingAppointmentsByDoctor(doctor.getId(), LocalDate.now());
+    }
+    
+    public Appointment cancelAppointmentWithReason(Long appointmentId, String cancellationReason) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+            .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        
+        // Verify this appointment belongs to the current patient
+        if (!appointment.getPatient().getId().equals(userDetails.getUserId())) {
+            throw new RuntimeException("Unauthorized to cancel this appointment");
+        }
+        
+        // Check if appointment can be cancelled
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new RuntimeException("Appointment is already cancelled");
+        }
+        
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new RuntimeException("Cannot cancel completed appointment");
+        }
+        
+        // Update appointment with cancellation details
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.setCancellationReason(cancellationReason);
+        appointment.setCancelledAt(LocalDateTime.now());
+        appointment.setCancelledBy("PATIENT");
+        
+        Appointment updatedAppointment = appointmentRepository.save(appointment);
+        
+        // Send cancellation email to doctor
+        try {
+            System.out.println("=== PATIENT CANCELLATION EMAIL DEBUG ===");
+            System.out.println("Appointment ID: " + updatedAppointment.getId());
+            System.out.println("Doctor Email: " + updatedAppointment.getDoctor().getEmail());
+            System.out.println("Patient Name: " + updatedAppointment.getPatient().getFirstName() + " " + updatedAppointment.getPatient().getLastName());
+            System.out.println("Cancellation Reason: " + cancellationReason);
+            
+            String doctorEmail = updatedAppointment.getDoctor().getEmail();
+            String subject = "Appointment Cancelled by Patient - Healthbridge";
+            String message = "Dear Dr. " + updatedAppointment.getDoctor().getFirstName() + " " + updatedAppointment.getDoctor().getLastName() + ",\n\n" +
+                "We regret to inform you that your appointment scheduled for " + updatedAppointment.getAppointmentDate().toString() + 
+                " at " + updatedAppointment.getAppointmentTime().toString() + " with " + updatedAppointment.getPatient().getFirstName() + " " + updatedAppointment.getPatient().getLastName() + 
+                " has been cancelled by the patient.\n\n" +
+                "Cancellation Reason: " + cancellationReason + "\n\n" +
+                "The time slot is now available for other patients.\n\n" +
+                "Best regards,\n" +
+                "Healthbridge Medical Team";
+            
+            emailService.sendEmail(doctorEmail, subject, message);
+            
+            System.out.println("✅ Cancellation email sent to doctor successfully");
+            
+        } catch (Exception emailError) {
+            System.err.println("❌ EMAIL FAILURE: Failed to send cancellation email to doctor");
+            System.err.println("Error: " + emailError.getMessage());
+            emailError.printStackTrace();
+            
+            // Log the failure but don't fail the cancellation
+            System.err.println("⚠️ WARNING: Appointment cancelled but doctor notification email failed");
+        }
+        
+        return updatedAppointment;
     }
 }

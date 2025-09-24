@@ -28,6 +28,9 @@ import { HeaderComponent } from '../../shared/header/header.component';
             <div>
               <h1 class="mb-1">Welcome back, {{ currentUser?.firstName }}!</h1>
               <p class="text-muted">Manage your appointments and health records</p>
+              <div class="patient-id-badge" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem;">
+                <i class="fas fa-id-card me-1"></i>Patient ID: {{ currentUser?.id || 'N/A' }}
+              </div>
             </div>
           </div>
           <div class="user-actions d-flex align-items-center" style="gap: 1rem;">

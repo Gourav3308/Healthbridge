@@ -113,7 +113,23 @@ public class AuthController {
     
     // Test endpoint to check URL generation
     @GetMapping("/test-reset-url")
-    public ResponseEntity<?> testResetUrl(@RequestParam String email) {
+    public ResponseEntity<?> testResetUrl() {
+        return ResponseEntity.ok().body("{\"message\": \"Reset URL test endpoint\"}");
+    }
+    
+    // Cleanup endpoint for duplicate Google IDs
+    @PostMapping("/cleanup-duplicates")
+    public ResponseEntity<?> cleanupDuplicateGoogleIds() {
+        try {
+            // This would need to be injected, but for now just return success
+            return ResponseEntity.ok().body("{\"message\": \"Cleanup endpoint available\"}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\": \"Cleanup failed: " + e.getMessage() + "\"}");
+        }
+    }
+    
+    @GetMapping("/test-reset-url-with-email")
+    public ResponseEntity<?> testResetUrlWithEmail(@RequestParam String email) {
         try {
             System.out.println("=== TEST RESET URL DEBUG ===");
             System.out.println("Testing reset URL generation for email: " + email);

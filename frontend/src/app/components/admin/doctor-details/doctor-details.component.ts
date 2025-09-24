@@ -45,18 +45,31 @@ import { HeaderComponent } from '../../shared/header/header.component';
               </div>
             </div>
             <div class="header-actions">
-              <button class="btn btn-primary me-2" (click)="editDoctor()">
-                <i class="fas fa-edit me-2"></i>Edit Doctor
-              </button>
-              <button class="btn" 
-                      [class]="doctor.isActive ? 'btn-warning' : 'btn-success'"
-                      (click)="toggleStatus()">
-                <i class="fas" [class]="doctor.isActive ? 'fa-pause' : 'fa-play'" class="me-2"></i>
-                {{ doctor.isActive ? 'Suspend' : 'Activate' }}
-              </button>
-              <button class="btn btn-danger ms-2" (click)="deleteDoctor()">
-                <i class="fas fa-trash me-2"></i>Delete
-              </button>
+              <!-- Show approval/rejection buttons for pending doctors -->
+              <div *ngIf="!doctor.isApproved" class="approval-actions">
+                <button class="btn btn-success me-2" (click)="approveDoctor()">
+                  <i class="fas fa-check me-2"></i>Approve Doctor
+                </button>
+                <button class="btn btn-danger me-2" (click)="rejectDoctor()">
+                  <i class="fas fa-times me-2"></i>Reject Doctor
+                </button>
+              </div>
+              
+              <!-- Show regular actions for approved doctors -->
+              <div *ngIf="doctor.isApproved">
+                <button class="btn btn-primary me-2" (click)="editDoctor()">
+                  <i class="fas fa-edit me-2"></i>Edit Doctor
+                </button>
+                <button class="btn" 
+                        [class]="doctor.isActive ? 'btn-warning' : 'btn-success'"
+                        (click)="toggleStatus()">
+                  <i class="fas" [class]="doctor.isActive ? 'fa-pause' : 'fa-play'" class="me-2"></i>
+                  {{ doctor.isActive ? 'Suspend' : 'Activate' }}
+                </button>
+                <button class="btn btn-danger ms-2" (click)="deleteDoctor()">
+                  <i class="fas fa-trash me-2"></i>Delete
+                </button>
+              </div>
             </div>
           </div>
 
@@ -450,6 +463,49 @@ export class DoctorDetailsComponent implements OnInit {
         error: (error) => {
           console.error('Error deleting doctor:', error);
           alert('Error deleting doctor. Please try again.');
+        }
+      });
+    }
+  }
+
+  approveDoctor(): void {
+    if (!this.doctor || !this.doctorId) return;
+
+    const doctorName = `${this.doctor.firstName} ${this.doctor.lastName}`;
+    const confirmMessage = `Are you sure you want to approve Dr. ${doctorName}?`;
+    
+    if (confirm(confirmMessage)) {
+      this.adminService.approveDoctor(this.doctorId).subscribe({
+        next: (response) => {
+          this.doctor!.isApproved = true;
+          alert(`Dr. ${doctorName} has been approved successfully!`);
+          // Optionally navigate back to dashboard or refresh
+          this.router.navigate(['/admin/dashboard']);
+        },
+        error: (error) => {
+          console.error('Error approving doctor:', error);
+          alert('Error approving doctor. Please try again.');
+        }
+      });
+    }
+  }
+
+  rejectDoctor(): void {
+    if (!this.doctor || !this.doctorId) return;
+
+    const doctorName = `${this.doctor.firstName} ${this.doctor.lastName}`;
+    const reason = prompt(`Please provide a reason for rejecting Dr. ${doctorName}:`);
+    
+    if (reason) {
+      this.adminService.rejectDoctor(this.doctorId).subscribe({
+        next: (response) => {
+          alert(`Dr. ${doctorName}'s application has been rejected.`);
+          // Navigate back to dashboard
+          this.router.navigate(['/admin/dashboard']);
+        },
+        error: (error) => {
+          console.error('Error rejecting doctor:', error);
+          alert('Error rejecting doctor. Please try again.');
         }
       });
     }

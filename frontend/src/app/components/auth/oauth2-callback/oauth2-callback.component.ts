@@ -77,21 +77,9 @@ export class OAuth2CallbackComponent implements OnInit {
         // Handle the OAuth2 callback
         this.authService.handleOAuth2Callback(token, userData);
 
-        // Redirect based on role
+        // Always redirect to patient dashboard
         setTimeout(() => {
-          switch (role) {
-            case 'ADMIN':
-              this.router.navigate(['/admin/dashboard']);
-              break;
-            case 'DOCTOR':
-              this.router.navigate(['/doctor/dashboard']);
-              break;
-            case 'PATIENT':
-              this.router.navigate(['/patient/dashboard']);
-              break;
-            default:
-              this.router.navigate(['/']);
-          }
+          this.router.navigate(['/patient/dashboard']);
         }, 1000);
       } else {
         this.errorMessage = 'Authentication failed. Missing required parameters.';

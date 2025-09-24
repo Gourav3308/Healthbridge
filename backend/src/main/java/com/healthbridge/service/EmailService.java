@@ -235,6 +235,10 @@ public class EmailService {
     }
     
     public void sendPasswordResetEmail(String email, String resetLink, String userName) {
+        sendPasswordResetEmail(email, resetLink, userName, "https://healthbridge-frontend-jj1l.onrender.com");
+    }
+    
+    public void sendPasswordResetEmail(String email, String resetLink, String userName, String frontendUrl) {
         try {
             System.out.println("=== PASSWORD RESET EMAIL DEBUG ===");
             System.out.println("Sending password reset email to: " + email);
@@ -263,7 +267,7 @@ public class EmailService {
                 "Best regards,\n" +
                 "🏥 HealthBridge Medical Center Team\n" +
                 "📧 Email: healthbridge13012002@gmail.com\n" +
-                "🌐 Website: https://healthbridge-frontend-jj1l.onrender.com\n\n" +
+                "🌐 Website: " + frontendUrl + "\n\n" +
                 "Thank you for choosing HealthBridge for your healthcare needs!",
                 
                 userName,

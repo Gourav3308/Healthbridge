@@ -3,6 +3,7 @@ package com.healthbridge.security;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Autowired
     private JwtUtil jwtUtil;
     
+    @Value("${frontend.url}")
+    private String frontendUrl;
+    
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
                                       Authentication authentication) throws IOException, ServletException {
@@ -31,17 +35,31 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         
         CustomOAuth2User oauth2User = (CustomOAuth2User) authentication.getPrincipal();
         
-        // Generate JWT token
-        String token = jwtUtil.generateToken(oauth2User.getEmail(), oauth2User.getRole(), oauth2User.getUserId());
+        System.out.println("=== OAUTH2 SUCCESS HANDLER DEBUG ===");
+        System.out.println("Request URL: " + request.getRequestURL());
+        System.out.println("Query String: " + request.getQueryString());
+        System.out.println("Request Parameters: " + request.getParameterMap());
+        System.out.println("User ID: " + oauth2User.getUserId());
+        System.out.println("Email: " + oauth2User.getEmail());
+        System.out.println("Role: " + oauth2User.getRole());
+        System.out.println("First Name: " + oauth2User.getFirstName());
+        System.out.println("Last Name: " + oauth2User.getLastName());
         
-        // Build redirect URL with token and user info  
-        String targetUrl = UriComponentsBuilder.fromUriString("https://healthbridge-frontend-jj1l.onrender.com/auth/callback")
+        // Always use PATIENT role for OAuth
+        String finalRole = "PATIENT";
+        System.out.println("Final role for token: " + finalRole);
+        
+        // Generate JWT token with the final role
+        String token = jwtUtil.generateToken(oauth2User.getEmail(), finalRole, oauth2User.getUserId());
+        
+        // Build redirect URL with token and user info using configured frontend URL
+        String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/auth/callback")
                 .queryParam("token", token)
                 .queryParam("userId", oauth2User.getUserId())
                 .queryParam("email", oauth2User.getEmail())
                 .queryParam("firstName", oauth2User.getFirstName())
                 .queryParam("lastName", oauth2User.getLastName())
-                .queryParam("role", oauth2User.getRole())
+                .queryParam("role", finalRole)
                 .queryParam("profileImage", oauth2User.getProfileImage())
                 .build().toUriString();
         

@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { Appointment } from '../models/appointment.model';
 import { Doctor, DoctorUpdateRequest, Specialization } from '../models/doctor.model';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -81,6 +81,10 @@ export class DoctorService {
     return this.http.get<Appointment[]>(`${this.apiUrl}/doctors/appointments`);
   }
 
+  getTodayAppointments(): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.apiUrl}/doctors/today-appointments`);
+  }
+
   getAppointmentById(appointmentId: number): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.apiUrl}/doctors/appointments/${appointmentId}`);
   }
@@ -91,5 +95,11 @@ export class DoctorService {
 
   rejectAppointment(appointmentId: number): Observable<string> {
     return this.http.post(`${this.apiUrl}/doctors/appointments/${appointmentId}/reject`, {}, { responseType: 'text' });
+  }
+
+  rejectAppointmentWithReason(appointmentId: number, cancellationReason: string): Observable<string> {
+    return this.http.post(`${this.apiUrl}/doctors/appointments/${appointmentId}/reject`, 
+      { cancellationReason: cancellationReason }, 
+      { responseType: 'text' });
   }
 }

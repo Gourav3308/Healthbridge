@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Appointment } from '../../../models/appointment.model';
 import { AppointmentService } from '../../../services/appointment.service';
@@ -8,7 +9,7 @@ import { FooterComponent } from '../../shared/footer/footer.component';
 @Component({
   selector: 'app-patient-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FooterComponent],
+  imports: [CommonModule, RouterModule, FooterComponent, FormsModule],
   template: `
     <div class="appointments-container">
       <div class="container">
@@ -156,14 +157,24 @@ import { FooterComponent } from '../../shared/footer/footer.component';
                       <p class="hospital text-sm mb-1">
                         <i class="fas fa-hospital me-2"></i>{{ getDoctorHospital(appointment) }}
                       </p>
-                      <p class="cancellation-reason text-sm mb-0" *ngIf="appointment.notes">
-                        <i class="fas fa-info-circle me-2"></i>{{ appointment.notes }}
+                      <p class="cancellation-reason text-sm mb-0" *ngIf="appointment.cancellationReason">
+                        <i class="fas fa-info-circle me-2"></i><strong>Cancellation Reason:</strong> {{ appointment.cancellationReason }}
                       </p>
                     </div>
                   </div>
                   <div class="col-md-2">
-                    <div class="appointment-status">
-                      <span class="badge badge-danger">Cancelled</span>
+                    <div class="appointment-status text-center">
+                      <span class="badge badge-danger mb-2">Cancelled</span>
+                      <div class="cancellation-source mb-2" *ngIf="appointment.cancellationReason">
+                        <small class="text-muted">
+                          <i class="fas fa-user-md me-1" *ngIf="isCancelledByDoctor(appointment)"></i>
+                          <i class="fas fa-user me-1" *ngIf="!isCancelledByDoctor(appointment)"></i>
+                          {{ isCancelledByDoctor(appointment) ? 'Cancelled by Doctor' : 'Cancelled by You' }}
+                        </small>
+                      </div>
+                      <button class="btn btn-sm btn-outline-primary" (click)="viewCancellationDetails(appointment)">
+                        <i class="fas fa-eye me-1"></i>View Details
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -179,6 +190,52 @@ import { FooterComponent } from '../../shared/footer/footer.component';
             <a routerLink="/patient/doctors" class="btn btn-primary">
               <i class="fas fa-search me-2"></i>Find Doctors
             </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Cancellation Reason Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cancelModalLabel">
+              <i class="fas fa-exclamation-triangle text-warning me-2"></i>Cancel Appointment
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning" role="alert">
+              <i class="fas fa-info-circle me-2"></i>
+              Please provide a reason for cancelling this appointment. This information will be shared with your doctor.
+            </div>
+            
+            <div class="mb-3">
+              <label for="cancellationReason" class="form-label">Cancellation Reason *</label>
+              <textarea 
+                class="form-control" 
+                id="cancellationReason" 
+                rows="4" 
+                [(ngModel)]="cancellationReason"
+                placeholder="Please explain why you need to cancel this appointment..."
+                required>
+              </textarea>
+              <div class="form-text">Minimum 10 characters required</div>
+            </div>
+            
+            <div class="appointment-details bg-light p-3 rounded">
+              <h6 class="mb-2">Appointment Details:</h6>
+              <p class="mb-1"><strong>Doctor:</strong> Dr. {{ selectedAppointment?.doctor?.firstName }} {{ selectedAppointment?.doctor?.lastName }}</p>
+              <p class="mb-1"><strong>Date:</strong> {{ selectedAppointment?.appointmentDate | date:'fullDate' }}</p>
+              <p class="mb-0"><strong>Time:</strong> {{ formatTime(selectedAppointment?.appointmentTime || '') }}</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Appointment</button>
+            <button type="button" class="btn btn-danger" (click)="confirmCancellation()" [disabled]="!cancellationReason || cancellationReason.trim().length < 10">
+              <i class="fas fa-times me-2"></i>Cancel Appointment
+            </button>
           </div>
         </div>
       </div>
@@ -291,6 +348,8 @@ export class AppointmentsComponent implements OnInit {
   completedAppointments: Appointment[] = [];
   cancelledAppointments: Appointment[] = [];
   allAppointments: Appointment[] = [];
+  selectedAppointment: Appointment | null = null;
+  cancellationReason = '';
 
   constructor(
     private appointmentService: AppointmentService,
@@ -375,14 +434,70 @@ export class AppointmentsComponent implements OnInit {
     }
   }
 
+  isCancelledByDoctor(appointment: Appointment): boolean {
+    return appointment.cancelledBy === 'DOCTOR';
+  }
+
+  viewCancellationDetails(appointment: Appointment): void {
+    // Navigate to cancellation details page
+    this.router.navigate(['/patient/cancellation-details', appointment.id]);
+  }
+
   cancelAppointment(appointment: Appointment): void {
-    if (confirm('Are you sure you want to cancel this appointment?')) {
-      // Move to cancelled appointments
-      this.upcomingAppointments = this.upcomingAppointments.filter(a => a.id !== appointment.id);
-      appointment.status = 'CANCELLED' as any;
-      appointment.notes = 'Cancelled by patient';
-      this.cancelledAppointments.push(appointment);
+    this.selectedAppointment = appointment;
+    this.cancellationReason = '';
+    
+    // Show the modal
+    const modal = document.getElementById('cancelModal');
+    if (modal) {
+      const bootstrapModal = new (window as any).bootstrap.Modal(modal);
+      bootstrapModal.show();
     }
+  }
+
+  confirmCancellation(): void {
+    if (!this.selectedAppointment || !this.cancellationReason || this.cancellationReason.trim().length < 10) {
+      return;
+    }
+
+    console.log('=== CANCELLATION DEBUG ===');
+    console.log('Appointment ID:', this.selectedAppointment.id);
+    console.log('Cancellation Reason:', this.cancellationReason.trim());
+    console.log('Appointment Object:', this.selectedAppointment);
+
+    // Call the backend to cancel with reason
+    this.appointmentService.cancelAppointmentWithReason(this.selectedAppointment.id!, this.cancellationReason.trim()).subscribe({
+      next: (response) => {
+        console.log('Appointment cancelled successfully:', response);
+        
+        // Update local state
+        this.upcomingAppointments = this.upcomingAppointments.filter(a => a.id !== this.selectedAppointment!.id);
+        this.selectedAppointment!.status = 'CANCELLED' as any;
+        this.selectedAppointment!.cancellationReason = this.cancellationReason.trim();
+        this.cancelledAppointments.push(this.selectedAppointment!);
+        
+        // Hide modal
+        const modal = document.getElementById('cancelModal');
+        if (modal) {
+          const bootstrapModal = (window as any).bootstrap.Modal.getInstance(modal);
+          bootstrapModal.hide();
+        }
+        
+        // Reset form
+        this.selectedAppointment = null;
+        this.cancellationReason = '';
+        
+        // Show success message
+        alert('Appointment cancelled successfully. Your doctor has been notified.');
+      },
+      error: (error) => {
+        console.error('Error cancelling appointment:', error);
+        console.error('Error details:', error.error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        alert('Failed to cancel appointment. Please try again.');
+      }
+    });
   }
 
   downloadPrescription(appointment: any): void {

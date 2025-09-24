@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,9 +68,47 @@ public class DoctorController {
         
         List<Doctor> doctors;
         
-        if (keyword != null && !keyword.isEmpty()) {
-            doctors = doctorRepository.searchDoctors(keyword);
+        // If keyword is provided, search by keyword first, then apply filters
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            doctors = doctorRepository.searchDoctors(keyword.trim());
+            
+            // Apply additional filters to keyword search results
+            if (specialization != null && !specialization.trim().isEmpty()) {
+                doctors = doctors.stream()
+                    .filter(d -> d.getSpecialization() != null && 
+                               d.getSpecialization().toLowerCase().equals(specialization.toLowerCase()))
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            if (city != null && !city.trim().isEmpty()) {
+                doctors = doctors.stream()
+                    .filter(d -> d.getCity() != null && 
+                               d.getCity().toLowerCase().equals(city.toLowerCase()))
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            if (minFee != null) {
+                doctors = doctors.stream()
+                    .filter(d -> d.getConsultationFee() != null && 
+                               d.getConsultationFee().compareTo(minFee) >= 0)
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            if (maxFee != null) {
+                doctors = doctors.stream()
+                    .filter(d -> d.getConsultationFee() != null && 
+                               d.getConsultationFee().compareTo(maxFee) <= 0)
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            if (minExperience != null) {
+                doctors = doctors.stream()
+                    .filter(d -> d.getExperienceYears() != null && 
+                               d.getExperienceYears() >= minExperience)
+                    .collect(java.util.stream.Collectors.toList());
+            }
         } else {
+            // No keyword, use filter-based search
             doctors = doctorRepository.findDoctorsWithFilters(
                 specialization, city, minFee, maxFee, minExperience);
         }
@@ -180,6 +220,35 @@ public class DoctorController {
             
         } catch (Exception e) {
             System.err.println("ERROR in getAllAppointments: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    // Get today's appointments for a doctor
+    @GetMapping("/today-appointments")
+    public ResponseEntity<List<Appointment>> getTodayAppointments() {
+        try {
+            System.out.println("DEBUG: getTodayAppointments endpoint called");
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String doctorEmail = authentication.getName();
+            System.out.println("DEBUG: Doctor email: " + doctorEmail);
+            
+            Doctor doctor = doctorRepository.findByEmail(doctorEmail)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+            System.out.println("DEBUG: Doctor found: " + doctor.getId());
+            
+            LocalDate today = LocalDate.now();
+            System.out.println("DEBUG: Today's date: " + today);
+            
+            List<Appointment> todayAppointments = appointmentRepository
+                .findByDoctorIdAndAppointmentDate(doctor.getId(), today);
+            System.out.println("DEBUG: Found " + todayAppointments.size() + " appointments for today");
+            
+            return ResponseEntity.ok(todayAppointments);
+            
+        } catch (Exception e) {
+            System.err.println("ERROR in getTodayAppointments: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
@@ -308,29 +377,50 @@ public class DoctorController {
     
     // Reject an appointment
     @PostMapping("/appointments/{appointmentId}/reject")
-    public ResponseEntity<String> rejectAppointment(@PathVariable Long appointmentId) {
+    public ResponseEntity<String> rejectAppointment(@PathVariable Long appointmentId, @RequestBody(required = false) Map<String, String> request) {
         try {
+            System.out.println("=== DOCTOR REJECTION DEBUG ===");
+            System.out.println("Appointment ID: " + appointmentId);
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String doctorEmail = authentication.getName();
+            System.out.println("Doctor Email: " + doctorEmail);
             
             Doctor doctor = doctorRepository.findByEmail(doctorEmail)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
+            System.out.println("Doctor ID: " + doctor.getId());
             
             Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
+            System.out.println("Appointment Status: " + appointment.getStatus());
+            System.out.println("Appointment Doctor ID: " + appointment.getDoctor().getId());
             
             // Verify this appointment belongs to the current doctor
             if (!appointment.getDoctor().getId().equals(doctor.getId())) {
                 return ResponseEntity.badRequest().body("Unauthorized to reject this appointment");
             }
             
-            // Check if appointment is in correct status
-            if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
-                return ResponseEntity.badRequest().body("Appointment is not pending approval");
+            // Check if appointment is in correct status (can reject SCHEDULED or CONFIRMED appointments)
+            if (appointment.getStatus() != AppointmentStatus.SCHEDULED && appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+                return ResponseEntity.badRequest().body("Appointment cannot be rejected. Status: " + appointment.getStatus());
+            }
+            
+            // Get cancellation reason from request
+            String cancellationReason = null;
+            if (request != null && request.containsKey("cancellationReason")) {
+                cancellationReason = request.get("cancellationReason");
+                System.out.println("Cancellation Reason: " + cancellationReason);
+            } else {
+                System.out.println("No cancellation reason provided");
             }
             
             // Reject the appointment
             appointment.setStatus(AppointmentStatus.CANCELLED);
+            if (cancellationReason != null && !cancellationReason.trim().isEmpty()) {
+                appointment.setCancellationReason(cancellationReason);
+            }
+            appointment.setCancelledAt(LocalDateTime.now());
+            appointment.setCancelledBy("DOCTOR");
             appointmentRepository.save(appointment);
             
             // Send rejection email to patient
@@ -340,8 +430,14 @@ public class DoctorController {
                 String message = "Dear " + appointment.getPatient().getFirstName() + " " + appointment.getPatient().getLastName() + ",\n\n" +
                     "We regret to inform you that your appointment scheduled for " + appointment.getAppointmentDate().toString() + 
                     " at " + appointment.getAppointmentTime().toString() + " with Dr. " + doctor.getFirstName() + " " + doctor.getLastName() + 
-                    " has been cancelled.\n\n" +
-                    "Your payment will be refunded within 3-5 business days.\n\n" +
+                    " has been cancelled.\n\n";
+                
+                // Add cancellation reason if provided
+                if (cancellationReason != null && !cancellationReason.trim().isEmpty()) {
+                    message += "Cancellation Reason: " + cancellationReason + "\n\n";
+                }
+                
+                message += "Your payment will be refunded within 3-5 business days.\n\n" +
                     "Please feel free to book another appointment at your convenience.\n\n" +
                     "Best regards,\n" +
                     "Healthbridge Medical Team";
@@ -354,6 +450,7 @@ public class DoctorController {
                 // Don't fail the rejection if email fails
             }
             
+            System.out.println("✅ Appointment rejected successfully");
             return ResponseEntity.ok("Appointment rejected and patient notified");
             
         } catch (Exception e) {

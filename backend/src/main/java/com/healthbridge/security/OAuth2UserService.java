@@ -1,5 +1,6 @@
 package com.healthbridge.security;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,49 +68,70 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Unsupported OAuth2 provider: " + registrationId);
         }
         
-        // Check if user exists by Google ID
+        // Check if user exists by Google ID in patients
         System.out.println("Checking for existing user with Google ID: " + userInfo.getId());
-        Optional<Patient> existingPatient = patientRepository.findByGoogleId(userInfo.getId());
-        Patient patient;
+        List<Patient> existingPatients = patientRepository.findAllByGoogleId(userInfo.getId());
         
-        if (existingPatient.isPresent()) {
-            System.out.println("Found existing user with Google ID");
-            patient = existingPatient.get();
-            // Update user info if needed
-            patient = updateExistingUser(patient, userInfo);
-        } else {
-            System.out.println("No user found with Google ID, checking by email: " + userInfo.getEmail());
-            // Check if user exists by email
-            Optional<Patient> patientByEmail = patientRepository.findByEmail(userInfo.getEmail());
-            if (patientByEmail.isPresent()) {
-                System.out.println("Found existing user with email, linking Google account");
-                // Link existing account with Google
-                patient = patientByEmail.get();
-                patient.setGoogleId(userInfo.getId());
-                patient.setAuthProvider("GOOGLE");
-                // Only set Google image if user doesn't have a custom uploaded image
-                if (userInfo.getImageUrl() != null && 
-                    (patient.getProfileImageUrl() == null || 
-                     !patient.getProfileImageUrl().startsWith("/uploads/"))) {
-                    patient.setProfileImageUrl(userInfo.getImageUrl());
-                }
-                patient = patientRepository.save(patient);
-                System.out.println("Successfully linked existing account with Google");
-            } else {
-                System.out.println("Creating new user from Google OAuth");
-                // Create new user
-                patient = createNewUser(userInfo);
-                System.out.println("New user created successfully with ID: " + patient.getId());
-            }
+        // Handle existing users by Google ID
+        if (!existingPatients.isEmpty()) {
+            System.out.println("Found " + existingPatients.size() + " existing patient(s) with Google ID");
+            Patient patient = handleExistingPatient(existingPatients, userInfo);
+            return new CustomOAuth2User(oauth2User.getAuthorities(), oauth2User.getAttributes(), 
+                                      "email", patient.getId(), patient.getEmail(), 
+                                      patient.getFirstName(), patient.getLastName(), 
+                                      patient.getRole(), patient.getProfileImageUrl());
         }
         
-        return new CustomOAuth2User(oauth2User.getAuthorities(), oauth2User.getAttributes(), 
-                                  "email", patient.getId(), patient.getEmail(), 
-                                  patient.getFirstName(), patient.getLastName(), 
-                                  patient.getRole(), patient.getProfileImageUrl());
+        // No user found with Google ID, check by email
+        System.out.println("No user found with Google ID, checking by email: " + userInfo.getEmail());
+        Optional<Patient> patientByEmail = patientRepository.findByEmail(userInfo.getEmail());
+        
+        if (patientByEmail.isPresent()) {
+            System.out.println("Found existing patient with email, linking Google account");
+            Patient patient = patientByEmail.get();
+            patient.setGoogleId(userInfo.getId());
+            patient.setAuthProvider("GOOGLE");
+            // Only set Google image if user doesn't have a custom uploaded image
+            if (userInfo.getImageUrl() != null && 
+                (patient.getProfileImageUrl() == null || 
+                 !patient.getProfileImageUrl().startsWith("/uploads/"))) {
+                patient.setProfileImageUrl(userInfo.getImageUrl());
+            }
+            patient = patientRepository.save(patient);
+            System.out.println("Successfully linked existing patient account with Google");
+            return new CustomOAuth2User(oauth2User.getAuthorities(), oauth2User.getAttributes(), 
+                                      "email", patient.getId(), patient.getEmail(), 
+                                      patient.getFirstName(), patient.getLastName(), 
+                                      patient.getRole(), patient.getProfileImageUrl());
+        } else {
+            // Create new patient (OAuth only creates patients)
+            Patient patient = createNewPatient(userInfo);
+            System.out.println("New patient created successfully with ID: " + patient.getId());
+            return new CustomOAuth2User(oauth2User.getAuthorities(), oauth2User.getAttributes(), 
+                                      "email", patient.getId(), patient.getEmail(), 
+                                      patient.getFirstName(), patient.getLastName(), 
+                                      patient.getRole(), patient.getProfileImageUrl());
+        }
     }
     
-    private Patient updateExistingUser(Patient patient, OAuth2UserInfo userInfo) {
+    private Patient handleExistingPatient(List<Patient> existingPatients, OAuth2UserInfo userInfo) {
+        if (existingPatients.size() > 1) {
+            System.out.println("⚠️ Multiple patients found with same Google ID, cleaning up duplicates");
+            // Keep the first one and remove duplicates
+            Patient patient = existingPatients.get(0);
+            for (int i = 1; i < existingPatients.size(); i++) {
+                System.out.println("Removing duplicate patient with ID: " + existingPatients.get(i).getId());
+                patientRepository.delete(existingPatients.get(i));
+            }
+            System.out.println("✅ Duplicate cleanup completed");
+            return updateExistingPatient(patient, userInfo);
+        } else {
+            return updateExistingPatient(existingPatients.get(0), userInfo);
+        }
+    }
+    
+    
+    private Patient updateExistingPatient(Patient patient, OAuth2UserInfo userInfo) {
         // Only update profile image if user doesn't have a custom uploaded image
         // Custom uploaded images start with "/uploads/"
         if (userInfo.getImageUrl() != null && 
@@ -121,7 +143,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         return patient;
     }
     
-    private Patient createNewUser(OAuth2UserInfo userInfo) {
+    
+    private Patient createNewPatient(OAuth2UserInfo userInfo) {
         Patient patient = new Patient();
         patient.setEmail(userInfo.getEmail());
         patient.setFirstName(userInfo.getFirstName());
@@ -135,4 +158,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         
         return patientRepository.save(patient);
     }
+    
+    
+    
 }

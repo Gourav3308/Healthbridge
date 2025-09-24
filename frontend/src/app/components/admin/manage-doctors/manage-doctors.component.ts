@@ -137,6 +137,9 @@ import { HeaderComponent } from '../../shared/header/header.component';
                         <div>
                           <div class="fw-semibold">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</div>
                           <small class="text-muted">{{ doctor.qualification }}</small>
+                          <div class="doctor-id-badge" style="display: inline-block; background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 0.125rem 0.5rem; border-radius: 10px; font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem;">
+                            <i class="fas fa-id-card me-1"></i>ID: {{ doctor.id }}
+                          </div>
                         </div>
                       </div>
                     </td>

@@ -17,6 +17,8 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     
     Optional<Patient> findByGoogleId(String googleId);
     
+    List<Patient> findAllByGoogleId(String googleId);
+    
     boolean existsByEmail(String email);
     
     boolean existsByGoogleId(String googleId);

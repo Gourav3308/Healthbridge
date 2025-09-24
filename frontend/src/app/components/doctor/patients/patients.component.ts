@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Appointment } from '../../../models/appointment.model';
 import { AuthService } from '../../../services/auth.service';
 import { DoctorService } from '../../../services/doctor.service';
+import { ImageService } from '../../../services/image.service';
 import { NotificationService } from '../../../services/notification.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
@@ -308,7 +309,8 @@ export class PatientsComponent implements OnInit {
     private doctorService: DoctorService,
     private authService: AuthService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private imageService: ImageService
   ) {}
 
   ngOnInit(): void {
@@ -427,8 +429,10 @@ export class PatientsComponent implements OnInit {
   }
 
   getPatientImageUrl(patient: any): string {
-    return 'https://via.placeholder.com/50x50/007bff/ffffff?text=' + 
-           (patient.firstName?.charAt(0) || 'P') + (patient.lastName?.charAt(0) || '');
+    if (patient.profileImageUrl) {
+      return this.imageService.getFullImageUrl(patient.profileImageUrl);
+    }
+    return this.imageService.getDefaultAvatar();
   }
 
   calculateAge(dateOfBirth: string): string {

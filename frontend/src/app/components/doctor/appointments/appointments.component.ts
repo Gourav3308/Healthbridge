@@ -1,14 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Appointment } from '../../../models/appointment.model';
 import { AppointmentService } from '../../../services/appointment.service';
+import { DoctorService } from '../../../services/doctor.service';
+import { ImageService } from '../../../services/image.service';
+import { NotificationService } from '../../../services/notification.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, RouterModule, FooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, FooterComponent],
   template: `
     <div class="appointments-container">
       <div class="container">
@@ -46,6 +50,12 @@ import { FooterComponent } from '../../shared/footer/footer.component';
                 Completed ({{ completedAppointments.length }})
               </button>
             </li>
+            <li class="nav-item">
+              <button class="nav-link" [class.active]="activeTab === 'cancelled'" 
+                      (click)="setActiveTab('cancelled')">
+                Cancelled ({{ cancelledAppointments.length }})
+              </button>
+            </li>
           </ul>
         </div>
 
@@ -63,14 +73,22 @@ import { FooterComponent } from '../../shared/footer/footer.component';
                     </div>
                   </div>
                   <div class="col-md-5">
-                    <div class="patient-info">
-                      <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
-                      <p class="contact text-muted mb-1">
-                        <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
-                      </p>
-                      <p class="reason text-sm mb-0" *ngIf="appointment.reasonForVisit">
-                        <i class="fas fa-notes-medical me-2"></i>{{ appointment.reasonForVisit }}
-                      </p>
+                    <div class="patient-info d-flex align-items-center">
+                      <div class="patient-avatar me-3">
+                        <img [src]="getPatientImageUrl(appointment)" 
+                             alt="Patient Profile" 
+                             class="patient-profile-image rounded-circle"
+                             style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #667eea;">
+                      </div>
+                      <div class="patient-details">
+                        <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
+                        <p class="contact text-muted mb-1">
+                          <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
+                        </p>
+                        <p class="reason text-sm mb-0" *ngIf="appointment.reasonForVisit">
+                          <i class="fas fa-notes-medical me-2"></i>{{ appointment.reasonForVisit }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-2">
@@ -112,14 +130,22 @@ import { FooterComponent } from '../../shared/footer/footer.component';
                     </div>
                   </div>
                   <div class="col-md-5">
-                    <div class="patient-info">
-                      <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
-                      <p class="contact text-muted mb-1">
-                        <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
-                      </p>
-                      <p class="reason text-sm mb-0" *ngIf="appointment.reasonForVisit">
-                        <i class="fas fa-notes-medical me-2"></i>{{ appointment.reasonForVisit }}
-                      </p>
+                    <div class="patient-info d-flex align-items-center">
+                      <div class="patient-avatar me-3">
+                        <img [src]="getPatientImageUrl(appointment)" 
+                             alt="Patient Profile" 
+                             class="patient-profile-image rounded-circle"
+                             style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #667eea;">
+                      </div>
+                      <div class="patient-details">
+                        <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
+                        <p class="contact text-muted mb-1">
+                          <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
+                        </p>
+                        <p class="reason text-sm mb-0" *ngIf="appointment.reasonForVisit">
+                          <i class="fas fa-notes-medical me-2"></i>{{ appointment.reasonForVisit }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-2">
@@ -157,19 +183,84 @@ import { FooterComponent } from '../../shared/footer/footer.component';
                     </div>
                   </div>
                   <div class="col-md-6">
-                    <div class="patient-info">
-                      <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
-                      <p class="contact text-muted mb-1">
-                        <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
-                      </p>
-                      <p class="prescription text-sm mb-0" *ngIf="appointment.prescription">
-                        <i class="fas fa-prescription me-2"></i>{{ appointment.prescription }}
-                      </p>
+                    <div class="patient-info d-flex align-items-center">
+                      <div class="patient-avatar me-3">
+                        <img [src]="getPatientImageUrl(appointment)" 
+                             alt="Patient Profile" 
+                             class="patient-profile-image rounded-circle"
+                             style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #667eea;">
+                      </div>
+                      <div class="patient-details">
+                        <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
+                        <p class="contact text-muted mb-1">
+                          <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
+                        </p>
+                        <p class="prescription text-sm mb-0" *ngIf="appointment.prescription">
+                          <i class="fas fa-prescription me-2"></i>{{ appointment.prescription }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-2">
                     <div class="appointment-status">
                       <span class="badge badge-success">Completed</span>
+                    </div>
+                  </div>
+                  <div class="col-md-1">
+                    <div class="appointment-actions">
+                      <button class="btn btn-sm btn-outline-primary" 
+                              (click)="viewDetails(appointment)">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cancelled Appointments -->
+          <div *ngIf="activeTab === 'cancelled'">
+            <div class="appointment-card card mb-3" *ngFor="let appointment of cancelledAppointments">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-md-3">
+                    <div class="appointment-info">
+                      <h6 class="mb-1">{{ formatDate(appointment.appointmentDate) }}</h6>
+                      <p class="text-muted mb-0">{{ formatTime(appointment.appointmentTime) }}</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="patient-info d-flex align-items-center">
+                      <div class="patient-avatar me-3">
+                        <img [src]="getPatientImageUrl(appointment)" 
+                             alt="Patient Profile" 
+                             class="patient-profile-image rounded-circle"
+                             style="width: 50px; height: 50px; object-fit: cover; border: 2px solid #667eea;">
+                      </div>
+                      <div class="patient-details">
+                        <h5 class="patient-name mb-1">{{ getPatientName(appointment) }}</h5>
+                        <p class="contact text-muted mb-1">
+                          <i class="fas fa-phone me-2"></i>{{ getPatientPhone(appointment) }}
+                        </p>
+                        <p class="reason text-sm mb-1" *ngIf="appointment.reasonForVisit">
+                          <i class="fas fa-notes-medical me-2"></i>{{ appointment.reasonForVisit }}
+                        </p>
+                        <p class="cancellation-reason text-sm mb-0" *ngIf="appointment.cancellationReason">
+                          <i class="fas fa-exclamation-triangle me-2 text-warning"></i><strong>Cancellation Reason:</strong> {{ appointment.cancellationReason }}
+                        </p>
+                        <p class="cancellation-source text-sm mb-0">
+                          <i class="fas fa-user-md me-2 text-info" *ngIf="isCancelledByDoctor(appointment)"></i>
+                          <i class="fas fa-user me-2 text-info" *ngIf="!isCancelledByDoctor(appointment)"></i>
+                          <strong>Cancelled by:</strong> {{ isCancelledByDoctor(appointment) ? 'You (Doctor)' : 'Patient' }}
+                          <span class="text-muted ms-2">({{ appointment.cancelledBy || 'Unknown' }})</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="appointment-status">
+                      <span class="badge badge-danger">Cancelled</span>
                     </div>
                   </div>
                   <div class="col-md-1">
@@ -196,6 +287,53 @@ import { FooterComponent } from '../../shared/footer/footer.component';
     </div>
     
     <app-footer></app-footer>
+
+    <!-- Cancellation Reason Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="rejectModalLabel">
+              <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+              Reject Appointment
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Please provide a reason for rejecting this appointment.</strong>
+              <br>This information will be shared with the patient.
+            </div>
+            
+            <div class="mb-3">
+              <label for="rejectionReason" class="form-label">
+                <i class="fas fa-comment me-2"></i>Cancellation Reason
+              </label>
+              <textarea 
+                class="form-control" 
+                id="rejectionReason" 
+                rows="4" 
+                [(ngModel)]="cancellationReason"
+                placeholder="Please provide a clear reason for rejecting this appointment..."
+                required>
+              </textarea>
+              <div class="form-text">
+                Minimum 10 characters required. This will be sent to the patient.
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Cancel
+            </button>
+            <button type="button" class="btn btn-danger" (click)="confirmRejection()" [disabled]="!cancellationReason || cancellationReason.length < 10">
+              <i class="fas fa-ban me-2"></i>Reject Appointment
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
     .appointments-container {
@@ -277,11 +415,17 @@ export class AppointmentsComponent implements OnInit {
   pendingAppointments: Appointment[] = [];
   confirmedAppointments: Appointment[] = [];
   completedAppointments: Appointment[] = [];
+  cancelledAppointments: Appointment[] = [];
   allAppointments: Appointment[] = [];
+  selectedAppointment: Appointment | null = null;
+  cancellationReason = '';
 
   constructor(
     private appointmentService: AppointmentService,
-    private router: Router
+    private doctorService: DoctorService,
+    private router: Router,
+    private imageService: ImageService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -315,6 +459,16 @@ export class AppointmentsComponent implements OnInit {
     this.completedAppointments = this.allAppointments.filter(apt => 
       apt.status === 'COMPLETED'
     );
+    
+    this.cancelledAppointments = this.allAppointments.filter(apt => 
+      apt.status === 'CANCELLED' || apt.status === 'NO_SHOW'
+    );
+    
+    // Debug cancelled appointments
+    console.log('Cancelled appointments:', this.cancelledAppointments);
+    this.cancelledAppointments.forEach(apt => {
+      console.log(`Appointment ${apt.id}: cancelledBy = ${apt.cancelledBy}, reason = ${apt.cancellationReason}`);
+    });
   }
 
   loadMockData(): void {
@@ -322,6 +476,7 @@ export class AppointmentsComponent implements OnInit {
     this.pendingAppointments = [];
     this.confirmedAppointments = [];
     this.completedAppointments = [];
+    this.cancelledAppointments = [];
   }
 
   setActiveTab(tab: string): void {
@@ -336,6 +491,8 @@ export class AppointmentsComponent implements OnInit {
         return this.confirmedAppointments;
       case 'completed':
         return this.completedAppointments;
+      case 'cancelled':
+        return this.cancelledAppointments;
       default:
         return [];
     }
@@ -362,6 +519,8 @@ export class AppointmentsComponent implements OnInit {
         return 'No confirmed appointments.';
       case 'completed':
         return 'No completed appointments yet.';
+      case 'cancelled':
+        return 'No cancelled appointments.';
       default:
         return '';
     }
@@ -388,19 +547,61 @@ export class AppointmentsComponent implements OnInit {
   }
 
   rejectAppointment(appointment: Appointment): void {
-    if (confirm(`Are you sure you want to reject this appointment with ${this.getPatientName(appointment)}?`)) {
-      this.appointmentService.updateAppointmentStatus(appointment.id, 'CANCELLED').subscribe({
-        next: (updatedAppointment) => {
-          // Remove from pending
-          this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== appointment.id);
-          alert(`Appointment with ${this.getPatientName(appointment)} has been rejected.`);
-        },
-        error: (error) => {
-          console.error('Error rejecting appointment:', error);
-          alert('Failed to reject appointment. Please try again.');
-        }
-      });
+    this.selectedAppointment = appointment;
+    this.cancellationReason = '';
+    
+    // Show the modal
+    const modal = document.getElementById('rejectModal');
+    if (modal) {
+      const bootstrap = (window as any).bootstrap;
+      if (bootstrap) {
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+      }
     }
+  }
+
+  confirmRejection(): void {
+    if (!this.selectedAppointment || !this.cancellationReason || this.cancellationReason.length < 10) {
+      this.notificationService.error('Validation Error', 'Please provide a valid cancellation reason (minimum 10 characters).');
+      return;
+    }
+
+    // Call the doctor service with cancellation reason
+    this.doctorService.rejectAppointmentWithReason(this.selectedAppointment.id, this.cancellationReason).subscribe({
+      next: (response) => {
+        this.notificationService.success('Success', `Appointment with ${this.getPatientName(this.selectedAppointment!)} has been rejected successfully! Patient has been notified with the cancellation reason via email.`);
+        
+        // Reload appointments to get updated data
+        this.loadAppointments();
+        
+        // Hide modal and reset form
+        this.hideModal();
+        this.resetForm();
+      },
+      error: (error) => {
+        console.error('Error rejecting appointment:', error);
+        this.notificationService.error('Error', 'Failed to reject appointment. Please try again.');
+      }
+    });
+  }
+
+  hideModal(): void {
+    const modal = document.getElementById('rejectModal');
+    if (modal) {
+      const bootstrap = (window as any).bootstrap;
+      if (bootstrap) {
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      }
+    }
+  }
+
+  resetForm(): void {
+    this.selectedAppointment = null;
+    this.cancellationReason = '';
   }
 
   markCompleted(appointment: Appointment): void {
@@ -420,9 +621,8 @@ export class AppointmentsComponent implements OnInit {
   }
 
   viewDetails(appointment: Appointment): void {
-    const patientName = this.getPatientName(appointment);
-    const details = `Appointment Details:\n\nPatient: ${patientName}\nDate: ${this.formatDate(appointment.appointmentDate)}\nTime: ${this.formatTime(appointment.appointmentTime)}\nReason: ${appointment.reasonForVisit}\nStatus: ${appointment.status}`;
-    alert(details);
+    // Navigate to patient details page with appointment ID
+    this.router.navigate(['/doctor/patient-details', appointment.id]);
   }
 
   viewPatientDetails(appointment: Appointment): void {
@@ -460,6 +660,17 @@ export class AppointmentsComponent implements OnInit {
       }
     }
     return appointment.phone || 'Not provided';
+  }
+
+  getPatientImageUrl(appointment: Appointment): string {
+    if (appointment.patient?.profileImageUrl) {
+      return this.imageService.getFullImageUrl(appointment.patient.profileImageUrl);
+    }
+    return this.imageService.getDefaultAvatar();
+  }
+
+  isCancelledByDoctor(appointment: Appointment): boolean {
+    return appointment.cancelledBy === 'DOCTOR';
   }
 
   formatDate(dateString: string): string {

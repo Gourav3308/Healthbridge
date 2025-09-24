@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = {"http://localhost:4200", "https://healthbridge-frontend-jj1.onrender.com"})
 public class TestController {
     
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Backend is running!");
+    }
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
     

@@ -112,4 +112,48 @@ public class AppointmentController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+    
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<?> cancelAppointment(
+            @PathVariable Long id, 
+            @RequestBody Map<String, String> request) {
+        try {
+            System.out.println("=== APPOINTMENT CANCELLATION DEBUG ===");
+            System.out.println("Received request for appointment ID: " + id);
+            System.out.println("Request body: " + request);
+            
+            String cancellationReason = request.get("cancellationReason");
+            if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+                System.out.println("❌ Cancellation reason is missing or empty");
+                return ResponseEntity.badRequest().body("Cancellation reason is required");
+            }
+            
+            System.out.println("Appointment ID: " + id);
+            System.out.println("Cancellation Reason: " + cancellationReason);
+            
+            Appointment appointment = appointmentService.cancelAppointmentWithReason(id, cancellationReason);
+            
+            System.out.println("✅ Appointment cancelled successfully with reason");
+            
+            // Return success response with appointment details
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("appointment", appointment);
+            response.put("message", "Appointment cancelled successfully");
+            response.put("cancellationReason", cancellationReason);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error cancelling appointment: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to cancel appointment: " + e.getMessage());
+            
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
 }

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Appointment, AppointmentBookingRequest, AppointmentRequest, PaymentOrderResponse, PaymentVerificationRequest } from '../models/appointment.model';
 import { environment } from '../../environments/environment';
+import { Appointment, AppointmentBookingRequest, AppointmentRequest, PaymentOrderResponse, PaymentVerificationRequest } from '../models/appointment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +35,12 @@ export class AppointmentService {
 
   updateAppointmentStatus(appointmentId: number, status: string): Observable<Appointment> {
     return this.http.put<Appointment>(`${this.apiUrl}/appointments/${appointmentId}/status?status=${status}`, {});
+  }
+
+  cancelAppointmentWithReason(appointmentId: number, cancellationReason: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/appointments/${appointmentId}/cancel`, {
+      cancellationReason: cancellationReason
+    });
   }
 
   // New enhanced booking methods

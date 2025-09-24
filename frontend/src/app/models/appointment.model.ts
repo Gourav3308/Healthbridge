@@ -9,7 +9,7 @@ export interface Appointment {
     dateOfBirth?: string;
     gender?: string;
     bloodGroup?: string;
-    profileImage?: string;
+    profileImageUrl?: string;
     fullName?: string;
     user?: {
       firstName: string;
@@ -42,6 +42,9 @@ export interface Appointment {
   medicalHistory?: string;
   isFirstVisit: boolean;
   emailSent: boolean;
+  cancellationReason?: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
   createdAt: string;
   updatedAt: string;
   

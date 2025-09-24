@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { AuthRequest, AuthResponse, DoctorRegistrationRequest, PatientRegistrationRequest } from '../models/user.model';
 import { environment } from '../../environments/environment';
+import { AuthRequest, AuthResponse, DoctorRegistrationRequest, PatientRegistrationRequest } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -164,9 +164,11 @@ export class AuthService {
 
   // Google OAuth2 Methods
   loginWithGoogle(): void {
-    // Redirect to backend OAuth2 endpoint
+    console.log('Initiating OAuth');
+    
+    // Redirect to our custom OAuth endpoint
     const backendUrl = environment.apiUrl.replace('/api', '');
-    window.location.href = `${backendUrl}/oauth2/authorization/google`;
+    window.location.href = `${backendUrl}/auth/google`;
   }
 
   handleOAuth2Callback(token: string, userData: any): void {

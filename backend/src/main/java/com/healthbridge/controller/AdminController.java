@@ -20,8 +20,8 @@ import com.healthbridge.dto.DoctorUpdateRequest;
 import com.healthbridge.dto.PatientUpdateRequest;
 import com.healthbridge.entity.Doctor;
 import com.healthbridge.entity.Patient;
-import com.healthbridge.repository.DoctorRepository;
 import com.healthbridge.repository.AppointmentSlotRepository;
+import com.healthbridge.repository.DoctorRepository;
 import com.healthbridge.service.AdminService;
 import com.healthbridge.service.AppointmentSlotService;
 
@@ -93,6 +93,46 @@ public class AdminController {
             return ResponseEntity.ok("Doctor registration rejected successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    @PostMapping("/doctors/{id}/reject")
+    public ResponseEntity<Map<String, String>> rejectDoctorWithReason(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        try {
+            System.out.println("=== ADMIN REJECTION DEBUG ===");
+            System.out.println("Doctor ID: " + id);
+            System.out.println("Request: " + request);
+            
+            String reason = request.get("reason");
+            System.out.println("Reason: " + reason);
+            
+            if (reason == null || reason.trim().isEmpty()) {
+                System.out.println("❌ No reason provided");
+                return ResponseEntity.badRequest().body(Map.of("error", "Rejection reason is required"));
+            }
+            
+            if (reason.trim().length() < 10) {
+                System.out.println("❌ Reason too short");
+                return ResponseEntity.badRequest().body(Map.of("error", "Rejection reason must be at least 10 characters long"));
+            }
+            
+            System.out.println("✅ Calling adminService.rejectDoctorWithReason");
+            adminService.rejectDoctorWithReason(id, reason);
+            System.out.println("✅ Doctor rejected successfully");
+            return ResponseEntity.ok(Map.of("message", "Doctor registration rejected successfully. The doctor has been notified via email."));
+        } catch (RuntimeException e) {
+            System.out.println("❌ Business logic error rejecting doctor: " + e.getMessage());
+            // Handle specific business logic errors
+            if (e.getMessage().contains("Doctor not found")) {
+                return ResponseEntity.notFound().build();
+            } else if (e.getMessage().contains("already approved")) {
+                return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("❌ Unexpected error rejecting doctor: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
         }
     }
     
